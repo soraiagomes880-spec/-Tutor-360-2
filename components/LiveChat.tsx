@@ -127,7 +127,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onSessionEnd }) =>
       setTranscription(prev => [...prev, { role: 'tutor', text: aiResponse }]);
     } catch (err) {
       console.error(err);
-      setTranscription(prev => [...prev, { role: 'tutor', text: "Erro ao conectar com a IA." }]);
+      setTranscription(prev => [...prev, { role: 'tutor', text: "Erro ao conectar com a IA: " + (err instanceof Error ? err.message : String(err)) }]);
     } finally {
       setIsTextLoading(false);
     }

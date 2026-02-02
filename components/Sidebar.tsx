@@ -25,14 +25,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, usage
     <aside className="w-72 glass-panel border-r border-white/10 flex flex-col h-full z-30">
       <div className="p-8 flex-1 overflow-y-auto">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Aprendizado</p>
+
+        {/* System Check Warning */}
+        {!process.env.API_KEY && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <div className="flex items-center gap-2 text-red-400 mb-2">
+              <i className="fas fa-triangle-exclamation"></i>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Configuração Pendente</span>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              A chave da API (API Key) não foi detectada. Configure a variável <code className="bg-red-500/20 px-1 rounded text-red-300">GEMINI_API_KEY</code> na Vercel e faça o redeploy.
+            </p>
+          </div>
+        )}
+
         <nav className="space-y-1.5 mb-10">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id as AppTab)}
               className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group ${activeTab === item.id
-                  ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/20 shadow-inner shadow-indigo-500/10'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/20 shadow-inner shadow-indigo-500/10'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white'
                 }`}
             >
               <i className={`fas ${item.icon} text-lg w-6 text-center ${activeTab === item.id ? 'scale-110' : 'group-hover:scale-110 transition-transform'}`}></i>

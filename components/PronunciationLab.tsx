@@ -81,7 +81,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language }) 
         source.start();
       }
     } catch (e) {
-      console.error(e);
+      console.error("PronunciationLab Error:", e);
       setIsPlayingTarget(false);
     }
   };
@@ -101,107 +101,108 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language }) 
         contents: `Analyze the pronunciation of this phrase in ${language} for a student: "${targetPhrase}". Assume the student just spoke this. Provide 3 specific tips on how to pronounce specific sounds or words in this text clearly. Respond in Portuguese.`,
       });
       setFeedback(response.text);
-    } catch (e) {
-      setFeedback("Erro ao analisar. Tente novamente.");
+    } catch (e: any) {
+      setFeedback("Erro ao analisar: " + (e.message || e.toString()));
     }
   };
+};
 
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Laboratório de Pronúncia</h2>
-          <p className="text-slate-400">Personalize seu treino escrevendo exatamente o que deseja praticar em {language}.</p>
-        </div>
+return (
+  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
+    <div className="flex items-center justify-between">
+      <div>
+        <h2 className="text-3xl font-bold text-white mb-2">Laboratório de Pronúncia</h2>
+        <p className="text-slate-400">Personalize seu treino escrevendo exatamente o que deseja praticar em {language}.</p>
       </div>
+    </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl space-y-8 flex flex-col">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">O que você quer treinar?</label>
-              <button
-                onClick={() => setTargetPhrase('')}
-                className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest"
-              >
-                Limpar Texto
-              </button>
-            </div>
-            <textarea
-              value={targetPhrase}
-              onChange={(e) => setTargetPhrase(e.target.value)}
-              placeholder={`Escreva uma palavra ou frase em ${language} aqui...`}
-              className="w-full bg-black/30 p-6 rounded-2xl border border-white/10 text-xl font-medium text-white leading-relaxed focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all resize-none h-40"
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={playTargetAudio}
-                disabled={isPlayingTarget || !targetPhrase.trim()}
-                className="flex items-center gap-2 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors uppercase tracking-widest"
-              >
-                <i className={`fas ${isPlayingTarget ? 'fa-spinner fa-spin' : 'fa-volume-high'}`}></i>
-                {isPlayingTarget ? 'Reproduzindo...' : 'Ouvir Pronúncia da IA'}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center gap-6 py-4 flex-1 justify-center">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl space-y-8 flex flex-col">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">O que você quer treinar?</label>
             <button
-              onMouseDown={() => setIsRecording(true)}
-              onMouseUp={handleAnalyze}
-              disabled={!targetPhrase.trim()}
-              className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 group relative disabled:opacity-20 disabled:grayscale ${isRecording ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-90' : 'bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/40 hover:scale-105'}`}
+              onClick={() => setTargetPhrase('')}
+              className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest"
             >
-              <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'} text-4xl text-white`}></i>
-              {isRecording && <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping"></div>}
+              Limpar Texto
             </button>
-            <div className="text-center">
-              <p className={`font-black text-sm transition-all uppercase tracking-widest ${isRecording ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
-                {isRecording ? 'Capturando sua voz...' : 'Segure para Gravar sua fala'}
-              </p>
-              {!targetPhrase.trim() && <p className="text-[10px] text-red-400/50 mt-2 uppercase tracking-tighter">Escreva algo acima primeiro</p>}
-            </div>
+          </div>
+          <textarea
+            value={targetPhrase}
+            onChange={(e) => setTargetPhrase(e.target.value)}
+            placeholder={`Escreva uma palavra ou frase em ${language} aqui...`}
+            className="w-full bg-black/30 p-6 rounded-2xl border border-white/10 text-xl font-medium text-white leading-relaxed focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all resize-none h-40"
+          />
+          <div className="flex justify-end">
+            <button
+              onClick={playTargetAudio}
+              disabled={isPlayingTarget || !targetPhrase.trim()}
+              className="flex items-center gap-2 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors uppercase tracking-widest"
+            >
+              <i className={`fas ${isPlayingTarget ? 'fa-spinner fa-spin' : 'fa-volume-high'}`}></i>
+              {isPlayingTarget ? 'Reproduzindo...' : 'Ouvir Pronúncia da IA'}
+            </button>
           </div>
         </div>
 
-        <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl flex flex-col min-h-[500px]">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Feedback Fonético Personalizado</label>
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
-            {feedback ? (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                <div className="flex items-center gap-4 text-green-400 mb-6 bg-green-400/10 p-5 rounded-2xl border border-green-400/20">
-                  <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <i className="fas fa-spell-check"></i>
-                  </div>
-                  <div>
-                    <p className="font-bold">Análise do Tutor IA</p>
-                    <p className="text-[10px] uppercase opacity-80 tracking-tighter">Foco na clareza e entonação</p>
-                  </div>
-                </div>
-                <div className="prose prose-invert text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-white/5 p-6 rounded-2xl border border-white/5 italic">
-                  {feedback}
-                </div>
-                <div className="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl">
-                  <p className="text-[10px] text-indigo-300 font-bold uppercase mb-2">Dica de mestre:</p>
-                  <p className="text-xs text-slate-400 leading-relaxed">Pratique cada palavra difícil isoladamente antes de tentar a frase completa várias vezes.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 italic p-12 text-center">
-                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 opacity-20">
-                  <i className="fas fa-keyboard text-3xl"></i>
-                </div>
-                <p className="max-w-[200px] text-sm leading-relaxed">Digite qualquer palavra ou frase difícil no campo ao lado. Grave-se falando e receba dicas instantâneas de como melhorar.</p>
-              </div>
-            )}
+        <div className="flex flex-col items-center gap-6 py-4 flex-1 justify-center">
+          <button
+            onMouseDown={() => setIsRecording(true)}
+            onMouseUp={handleAnalyze}
+            disabled={!targetPhrase.trim()}
+            className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 group relative disabled:opacity-20 disabled:grayscale ${isRecording ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-90' : 'bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/40 hover:scale-105'}`}
+          >
+            <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'} text-4xl text-white`}></i>
+            {isRecording && <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping"></div>}
+          </button>
+          <div className="text-center">
+            <p className={`font-black text-sm transition-all uppercase tracking-widest ${isRecording ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
+              {isRecording ? 'Capturando sua voz...' : 'Segure para Gravar sua fala'}
+            </p>
+            {!targetPhrase.trim() && <p className="text-[10px] text-red-400/50 mt-2 uppercase tracking-tighter">Escreva algo acima primeiro</p>}
           </div>
         </div>
       </div>
-      <style>{`
+
+      <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl flex flex-col min-h-[500px]">
+        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Feedback Fonético Personalizado</label>
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+          {feedback ? (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-center gap-4 text-green-400 mb-6 bg-green-400/10 p-5 rounded-2xl border border-green-400/20">
+                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <i className="fas fa-spell-check"></i>
+                </div>
+                <div>
+                  <p className="font-bold">Análise do Tutor IA</p>
+                  <p className="text-[10px] uppercase opacity-80 tracking-tighter">Foco na clareza e entonação</p>
+                </div>
+              </div>
+              <div className="prose prose-invert text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-white/5 p-6 rounded-2xl border border-white/5 italic">
+                {feedback}
+              </div>
+              <div className="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-xl">
+                <p className="text-[10px] text-indigo-300 font-bold uppercase mb-2">Dica de mestre:</p>
+                <p className="text-xs text-slate-400 leading-relaxed">Pratique cada palavra difícil isoladamente antes de tentar a frase completa várias vezes.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-slate-500 italic p-12 text-center">
+              <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 opacity-20">
+                <i className="fas fa-keyboard text-3xl"></i>
+              </div>
+              <p className="max-w-[200px] text-sm leading-relaxed">Digite qualquer palavra ou frase difícil no campo ao lado. Grave-se falando e receba dicas instantâneas de como melhorar.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+    <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
       `}</style>
-    </div>
-  );
+  </div>
+);
 };

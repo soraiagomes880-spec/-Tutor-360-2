@@ -27,8 +27,8 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language }) => {
         contents: `Analyze this ${language} text for grammar, vocabulary, and flow. Suggest corrections and explain why in Portuguese: "${text}"`,
       });
       setAnalysis(response.text);
-    } catch (e) {
-      setAnalysis("Erro na análise.");
+    } catch (e: any) {
+      setAnalysis("Erro na análise: " + (e.message || e.toString()));
     } finally {
       setIsLoading(false);
     }
@@ -44,8 +44,8 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language }) => {
         contents: `Translate the following educational analysis from Portuguese to ${targetTransLang}. Keep the same formatting and tone: "${analysis}"`,
       });
       setTranslation(response.text);
-    } catch (e) {
-      setTranslation("Erro ao traduzir a análise.");
+    } catch (e: any) {
+      setTranslation("Erro ao traduzir: " + (e.message || e.toString()));
     } finally {
       setIsTranslating(false);
     }

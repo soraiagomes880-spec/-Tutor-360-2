@@ -144,8 +144,9 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language }) => {
         }
       });
       setResult(response.text);
-    } catch (e) {
-      setResult("Falha ao analisar a imagem.");
+    } catch (e: any) {
+      setResult("Falha ao analisar a imagem: " + (e.message || e.toString()));
+      console.error("VisualScan Error:", e);
     } finally {
       setIsScanning(false);
     }

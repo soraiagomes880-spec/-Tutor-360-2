@@ -27,14 +27,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, usage
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Aprendizado</p>
 
         {/* System Check Warning */}
+        {/* System Check Warning */}
         {!process.env.API_KEY && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
             <div className="flex items-center gap-2 text-red-400 mb-2">
               <i className="fas fa-triangle-exclamation"></i>
-              <span className="text-[10px] font-bold uppercase tracking-widest">Configuração Pendente</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Ação Necessária</span>
             </div>
+            <p className="text-xs text-slate-400 leading-relaxed mb-2">
+              A chave não foi detectada. A Vercel exige o prefixo <b>VITE_</b> para funcionar.
+            </p>
             <p className="text-xs text-slate-400 leading-relaxed">
-              A chave da API (API Key) não foi detectada. Configure a variável <code className="bg-red-500/20 px-1 rounded text-red-300">GEMINI_API_KEY</code> na Vercel e faça o redeploy.
+              Crie uma variável chamada <code className="bg-red-500/20 px-1 rounded text-red-300 font-bold">VITE_GEMINI_API_KEY</code> com sua chave.
             </p>
           </div>
         )}

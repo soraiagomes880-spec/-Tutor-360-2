@@ -1,0 +1,23 @@
+🔥 TUTOR 360 IA - PLANO PRO CONCLUÍDO 🔥
+
+Preparei tudo para você subir no Supabase e na sua hospedagem (Vercel).
+
+CONTEÚDO DESTE PROJETO:
+1. Código Fonte Atualizado (PRO)
+2. 'supabase_schema.sql': O arquivo que você deve copiar e colar no SQL Editor do Supabase.
+3. Configuração de Tradução Avançada em todos os laboratórios.
+4. Sistema de Configuração Secreta (5 cliques no título).
+
+COMO CONFIGURAR O SUPABASE:
+1. Abra seu projeto no Supabase.
+2. Vá em 'SQL Editor'.
+3. Clique em 'New Query'.
+4. Abra o arquivo 'supabase_schema.sql' deste projeto, copie o conteúdo e cole no Supabase.
+5. Clique em 'Run'.
+
+COMO CONFIGURAR A IA:
+1. No seu site no ar (ou local), clique 5 vezes em "Tutor 360" no topo.
+2. Insira sua Gemini API Key e os dados do Supabase.
+3. Clique em Salvar.
+
+Tudo pronto para decolar! 🚀

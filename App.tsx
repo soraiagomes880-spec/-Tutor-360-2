@@ -10,7 +10,87 @@ import { CultureHub } from './components/CultureHub';
 import { Tutorial } from './components/Tutorial';
 import { Auth } from './components/Auth';
 import { AppTab, Language, LANGUAGES } from './types';
-import { supabase } from './lib/supabase';
+import { supabase, saveSupabaseConfig } from './lib/supabase';
+import { getGeminiKey, saveGeminiKey } from './lib/gemini';
+
+const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+  const [apiKey, setApiKey] = useState(getGeminiKey() || '');
+  const [supaUrl, setSupaUrl] = useState(localStorage.getItem('supabase_url') || '');
+  const [supaKey, setSupaKey] = useState(localStorage.getItem('supabase_key') || '');
+  const [activeTab, setActiveTab] = useState<'api' | 'supabase'>('api');
+
+  if (!isOpen) return null;
+
+  const currentGemini = getGeminiKey();
+  const currentSupa = localStorage.getItem('supabase_url');
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="w-full max-w-lg glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+          <i className="fas fa-times text-xl"></i>
+        </button>
+
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-900/40">
+            <i className="fas fa-cog text-white text-2xl"></i>
+          </div>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Configurações Avançadas</h2>
+          <p className="text-slate-400 text-xs mt-1 lowercase">Ambiente de Controle do Administrador</p>
+        </div>
+
+        <div className="flex bg-white/5 p-1 rounded-xl mb-6">
+          <button onClick={() => setActiveTab('api')} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${activeTab === 'api' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Gemini AI</button>
+          <button onClick={() => setActiveTab('supabase')} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${activeTab === 'supabase' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}>Supabase</button>
+        </div>
+
+        <div className="space-y-4 mb-8">
+          {activeTab === 'api' ? (
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-2 px-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Google Gemini API Key</label>
+                  {currentGemini && <span className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-black uppercase">Ativo</span>}
+                </div>
+                <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="AIzaSy..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-700 outline-none focus:border-indigo-500/50 transition-all font-mono text-xs" />
+              </div>
+              <button
+                onClick={() => { saveGeminiKey(apiKey); window.location.reload(); }}
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-900/40 active:scale-95 text-xs uppercase"
+              >
+                Salvar Chave IA
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-2 px-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Supabase Project URL</label>
+                  {currentSupa && <span className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-black uppercase">Ativo</span>}
+                </div>
+                <input type="text" value={supaUrl} onChange={(e) => setSupaUrl(e.target.value)} placeholder="https://xxx.supabase.co" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-700 outline-none focus:border-indigo-500/50 transition-all font-mono text-xs" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Supabase Anon Key</label>
+                <input type="password" value={supaKey} onChange={(e) => setSupaKey(e.target.value)} placeholder="eyJhbGci..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-700 outline-none focus:border-indigo-500/50 transition-all font-mono text-xs" />
+              </div>
+              <button
+                onClick={() => saveSupabaseConfig(supaUrl, supaKey)}
+                className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-900/40 active:scale-95 text-xs uppercase"
+              >
+                Salvar Banco de Dados
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="pt-6 border-t border-white/5 text-center">
+          <p className="text-[9px] text-slate-600 leading-relaxed max-w-xs mx-auto italic uppercase tracking-wider font-medium">As chaves são salvas localmente e priorizam as variáveis de ambiente da Vercel.</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export type PlanLevel = 'Essencial' | 'Pro' | 'Elite';
 
@@ -21,41 +101,10 @@ const App: React.FC = () => {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [usageCount, setUsageCount] = useState(0);
-  const [plan, setPlan] = useState<PlanLevel>('Essencial');
+  const [plan, setPlan] = useState<PlanLevel>('Pro');
   const [isLoadingData, setIsLoadingData] = useState(true);
-  const [setupClickCount, setSetupClickCount] = useState(0);
-
-  // States for Inline Setup
   const [showSetup, setShowSetup] = useState(false);
-  const [setupUrl, setSetupUrl] = useState('');
-  const [setupKey, setSetupKey] = useState('');
-  const [setupGeminiKey, setSetupGeminiKey] = useState('');
-  const [isSavingSetup, setIsSavingSetup] = useState(false);
-
-  useEffect(() => {
-    if (showSetup) {
-      setSetupUrl(localStorage.getItem('supabase_url') || '');
-      setSetupKey(localStorage.getItem('supabase_key') || '');
-      setSetupGeminiKey(localStorage.getItem('gemini_api_key') || '');
-    }
-  }, [showSetup]);
-
-  const handleSaveSetup = () => {
-    if (!setupUrl || !setupKey || !setupGeminiKey) {
-      alert("Preencha URL, Chave Supabase e Chave Gemini");
-      return;
-    }
-    setIsSavingSetup(true);
-    try {
-      localStorage.setItem('supabase_url', setupUrl);
-      localStorage.setItem('supabase_key', setupKey);
-      localStorage.setItem('gemini_api_key', setupGeminiKey);
-      window.location.reload();
-    } catch (e) {
-      alert("Erro ao salvar");
-      setIsSavingSetup(false);
-    }
-  };
+  const [setupClickCount, setSetupClickCount] = useState(0);
 
   const planLimits: Record<PlanLevel, number> = {
     'Essencial': 50,
@@ -79,7 +128,13 @@ const App: React.FC = () => {
       setSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    const handleOpenSetup = () => setShowSetup(true);
+    window.addEventListener('open-setup', handleOpenSetup);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('open-setup', handleOpenSetup);
+    };
   }, []);
 
   useEffect(() => {
@@ -96,14 +151,14 @@ const App: React.FC = () => {
 
           if (data) {
             setUsageCount(data.usage_count || 0);
-            setPlan(data.plan_level || 'Essencial');
+            // Priorizamos Pro para este deploy específico
+            setPlan('Pro');
           } else if (error && error.code === 'PGRST116') {
-            // Cria perfil inicial ZERADO para o novo aluno
             await supabase.from('profiles').insert([
-              { id: session.user.id, usage_count: 0, plan_level: 'Essencial' }
+              { id: session.user.id, usage_count: 0, plan_level: 'Pro' }
             ]);
             setUsageCount(0);
-            setPlan('Essencial');
+            setPlan('Pro');
           }
         } catch (e) {
           console.error("Erro na sincronização:", e);
@@ -119,13 +174,10 @@ const App: React.FC = () => {
     loadData();
   }, [session]);
 
-  const trackUsage = async (): Promise<boolean> => {
-    if (usageCount >= usageLimit) {
-      alert("Você atingiu o limite do seu Plano Essencial (50/50). Faça o upgrade para continuar aprendendo!");
-      return false;
-    }
-
+  const trackUsage = async () => {
     const nextCount = usageCount + 1;
+    if (nextCount > usageLimit) return;
+
     setUsageCount(nextCount);
 
     if (supabase && session?.user) {
@@ -136,14 +188,13 @@ const App: React.FC = () => {
     } else {
       localStorage.setItem('tutor_usage', nextCount.toString());
     }
-    return true;
   };
 
   const handleLogout = async () => {
     if (supabase) await supabase.auth.signOut();
     else {
       setSession(null);
-      setUsageCount(0); // Reseta visualmente para visitantes
+      setUsageCount(0);
     }
   };
 
@@ -156,7 +207,7 @@ const App: React.FC = () => {
       <div className="h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.3em]">Preparando sua aula...</p>
+          <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.3em]">Preparando Ambiente PRO...</p>
         </div>
       </div>
     );
@@ -166,36 +217,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden relative">
-
-      {/* Inline Setup Modal */}
-      {showSetup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
-            <button onClick={() => setShowSetup(false)} className="absolute top-3 right-3 text-slate-500 hover:text-white"><i className="fas fa-times"></i></button>
-            <h3 className="text-lg font-bold text-white mb-4 text-center">Conectar Supabase</h3>
-
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-[10px] uppercase font-bold text-slate-500">Supabase Project URL</label>
-                <input value={setupUrl} onChange={e => setSetupUrl(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm" placeholder="https://..." />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold text-slate-500">Supabase Anon Key</label>
-                <input value={setupKey} onChange={e => setSetupKey(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm" type="password" placeholder="Key..." />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold text-emerald-500">Google Gemini API Key</label>
-                <input value={setupGeminiKey} onChange={e => setSetupGeminiKey(e.target.value)} className="w-full bg-black/50 border border-emerald-500/30 rounded-lg px-3 py-2 text-sm" type="password" placeholder="AlzaSy..." />
-              </div>
-              <button onClick={handleSaveSetup} disabled={isSavingSetup} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl mt-2 transition-all">
-                {isSavingSetup ? 'Salvando...' : 'Salvar e Conectar TUDO'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <Sidebar
         activeTab={activeTab}
         setActiveTab={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }}
@@ -236,18 +257,6 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-
-            {/* O botão "Configurar IA" agora só aparece se NÃO houver chave configurada ou se clicado 5 vezes no logo */}
-            {(!localStorage.getItem('gemini_api_key') || !localStorage.getItem('supabase_url')) && (
-              <button
-                onClick={() => setShowSetup(true)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition-all animate-pulse"
-              >
-                <i className="fas fa-plug"></i>
-                Configurar IA
-              </button>
-            )}
-
             <div className="relative">
               <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl hover:bg-white/10 transition-all">
                 <span className="text-lg">{currentLang.flag}</span>
@@ -284,6 +293,7 @@ const App: React.FC = () => {
           {activeTab === 'culture' && <CultureHub language={language} onAction={trackUsage} />}
           {activeTab === 'tutorial' && <Tutorial setActiveTab={setActiveTab} />}
         </div>
+        <SetupModal isOpen={showSetup} onClose={() => setShowSetup(false)} />
       </main>
     </div>
   );

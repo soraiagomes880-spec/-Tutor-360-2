@@ -7,7 +7,7 @@ import { getGeminiKey } from '../lib/gemini';
 
 interface PronunciationLabProps {
   language: Language;
-  onAction?: () => Promise<boolean> | boolean;
+  onAction?: () => void;
 }
 
 const DEFAULT_PHRASES: Record<Language, string> = {
@@ -25,17 +25,17 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
   const [targetPhrase, setTargetPhrase] = useState(DEFAULT_PHRASES[language]);
   const [isRecording, setIsRecording] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [translation, setTranslation] = useState<string | null>(null);
-  const [isPlayingTarget, setIsPlayingTarget] = useState(false);
+  const [translatedFeedback, setTranslatedFeedback] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [targetTransLang, setTargetTransLang] = useState<Language>('Português Brasil');
+  const [isPlayingTarget, setIsPlayingTarget] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     setTargetPhrase(DEFAULT_PHRASES[language]);
     setFeedback(null);
-    setTranslation(null);
+    setTranslatedFeedback(null);
   }, [language]);
 
   const decode = (base64: string) => {
@@ -61,7 +61,10 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     setIsPlayingTarget(true);
     try {
       const apiKey = getGeminiKey();
-      if (!apiKey) return;
+      if (!apiKey) {
+        setIsPlayingTarget(false);
+        return;
+      }
       const ai = new GoogleGenAI({ apiKey });
       // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
@@ -95,20 +98,13 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
       return;
     }
     setFeedback("Analisando sua pronúncia...");
-    setTranslation(null);
-    if (onAction) {
-      const allowed = await onAction();
-      if (!allowed) {
-        setIsRecording(false);
-        setFeedback(null);
-        return;
-      }
-    }
+    setTranslatedFeedback(null);
+    if (onAction) onAction();
 
     try {
       const apiKey = getGeminiKey();
       if (!apiKey) {
-        setFeedback("Configure a Gemini API Key no botão 'Conectar Nuvem'");
+        setFeedback("API Key não configurada. Use o título Tutor 360 para configurar.");
         return;
       }
       const ai = new GoogleGenAI({ apiKey });
@@ -127,7 +123,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     }
   };
 
-  const translateFeedback = async () => {
+  const handleTranslate = async () => {
     if (!feedback || isTranslating) return;
     setIsTranslating(true);
     try {
@@ -137,10 +133,10 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
-          parts: [{ text: `Translate the following pronunciation feedback into ${targetTransLang}: "${feedback}". Respond ONLY with the translation.` }]
+          parts: [{ text: `Translate the following educational feedback into ${targetTransLang}: "${feedback}". Respond ONLY with the translation.` }]
         }
       }));
-      setTranslation(response.text ?? null);
+      setTranslatedFeedback(response.text ?? null);
     } catch (e) {
       alert("Erro na tradução.");
     } finally {
@@ -208,14 +204,14 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
                   {feedback}
                 </div>
 
-                {translation && (
-                  <div className="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10 animate-in fade-in slide-in-from-top-4">
+                {translatedFeedback && (
+                  <div className="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10 animate-in fade-in slide-in-from-top-4 mt-6">
                     <div className="flex items-center gap-2 mb-3 text-emerald-400">
                       <i className="fas fa-language"></i>
                       <span className="text-[10px] font-black uppercase tracking-widest">Tradução em {targetTransLang}</span>
                     </div>
                     <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-wrap italic">
-                      {translation}
+                      {translatedFeedback}
                     </p>
                   </div>
                 )}
@@ -231,17 +227,17 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
                           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-slate-300 font-medium outline-none cursor-pointer hover:border-white/20 transition-all appearance-none"
                         >
                           {LANGUAGES.map(lang => (
-                            <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
+                            <option key={lang.name} value={lang.name} className="bg-[#0f172a]">{lang.name}</option>
                           ))}
                         </select>
                       </div>
                       <button
-                        onClick={translateFeedback}
+                        onClick={handleTranslate}
                         disabled={isTranslating}
                         className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20 font-bold text-[10px] uppercase tracking-widest active:scale-95 disabled:opacity-50"
                       >
                         {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-language"></i>}
-                        {translation ? 'Traduzir de Novo' : 'Traduzir Agora'}
+                        {translatedFeedback ? 'Traduzir de Novo' : 'Traduzir Agora'}
                         <span className="ml-2 px-1.5 py-0.5 bg-indigo-400 text-[#0f172a] rounded text-[8px]">PRONTO</span>
                       </button>
                     </div>

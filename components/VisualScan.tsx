@@ -7,7 +7,7 @@ import { getGeminiKey } from '../lib/gemini';
 
 interface VisualScanProps {
   language: Language;
-  onAction?: () => Promise<boolean> | boolean;
+  onAction?: () => void;
 }
 
 const SCAN_MESSAGES = [
@@ -47,18 +47,11 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction }) =>
     setIsScanning(true);
     setResult(null);
     setTranslatedResult(null);
-    if (onAction) {
-      const allowed = await onAction();
-      if (!allowed) {
-        setIsScanning(false);
-        return;
-      }
-    }
+    if (onAction) onAction();
     try {
       const apiKey = getGeminiKey();
       if (!apiKey) {
-        alert("Configure a Gemini API Key no botão 'Conectar Nuvem'");
-        setIsScanning(false);
+        setResult("API Key não configurada. Use o menu secreto (5 cliques no título) para configurar.");
         return;
       }
       const ai = new GoogleGenAI({ apiKey });

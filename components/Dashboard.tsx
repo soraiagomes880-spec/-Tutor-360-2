@@ -14,9 +14,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, setActiveTab, us
   const usagePercentage = Math.round((usage / limit) * 100);
   const strokeDashoffset = 502 - (502 * usagePercentage) / 100;
 
+  // No Plano PRO, as vozes e o vocabulário não estão mais bloqueados
   const lockedFeatures = [
-    { name: 'Vozes Premium (Masculino/Feminino)', plan: 'PRO' },
-    { name: 'Sugestão de Vocabulário Avançado', plan: 'PRO' },
     { name: 'Busca em Tempo Real (Google Search)', plan: 'ELITE' },
     { name: 'Modo Business & Notícias de Hoje', plan: 'ELITE' },
   ];
@@ -26,7 +25,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, setActiveTab, us
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">Praticar {language}</h2>
-          <p className="text-slate-400 text-base md:text-lg">Foco de hoje: <span className="text-indigo-400 font-semibold">Conversação Natural</span></p>
+          <p className="text-slate-400 text-base md:text-lg">Foco de hoje: <span className="text-indigo-400 font-semibold">Conversação Fluida (PRO)</span></p>
         </div>
         <div className="bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></div>
@@ -46,15 +45,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, setActiveTab, us
           <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center text-blue-400 mb-4">
             <i className="fas fa-bolt text-xl"></i>
           </div>
-          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Limite do Plano</p>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Limite PRO</p>
           <h3 className="text-xl md:text-2xl font-bold text-white">{limit}</h3>
         </div>
         <div className="glass-panel p-6 rounded-3xl border-white/10 flex flex-col items-center text-center">
           <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-400 mb-4">
             <i className="fas fa-award text-xl"></i>
           </div>
-          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Status</p>
-          <h3 className="text-xl md:text-2xl font-bold text-white">VIP</h3>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Vantagem</p>
+          <h3 className="text-xl md:text-2xl font-bold text-white">Vozes HD</h3>
         </div>
       </div>
 
@@ -71,8 +70,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, setActiveTab, us
               </div>
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-white mb-2">Progresso no Plano</h3>
-              <p className="text-slate-400 text-sm mb-4 italic">Você ainda tem {limit - usage} créditos disponíveis este mês.</p>
+              <h3 className="text-xl font-bold text-white mb-2">Seu Progresso PRO</h3>
+              <p className="text-slate-400 text-sm mb-4 italic">Aproveite as vozes premium liberadas!</p>
               <button onClick={() => setActiveTab('live')} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-lg shadow-indigo-900/40">Continuar Prática de Voz</button>
             </div>
           </div>
@@ -80,8 +79,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, setActiveTab, us
 
         <div className="glass-panel p-6 md:p-8 rounded-[2.5rem] border-white/10 bg-slate-900/40">
           <h3 className="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <i className="fas fa-rocket"></i>
-            Próximos Níveis (Bloqueado)
+            <i className="fas fa-lock"></i>
+            Recursos Reservados (Elite)
           </h3>
           <div className="space-y-3">
             {lockedFeatures.map((f, i) => (
@@ -90,7 +89,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, setActiveTab, us
                   <i className="fas fa-lock text-[10px] text-slate-500"></i>
                   <span className="text-xs text-slate-400">{f.name}</span>
                 </div>
-                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border ${f.plan === 'PRO' ? 'border-blue-500/30 text-blue-400' : 'border-amber-500/30 text-amber-400'}`}>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded border border-amber-500/30 text-amber-400">
                   {f.plan}
                 </span>
               </div>

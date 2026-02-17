@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, Type, GenerateContentResponse } from '@google/genai';
 import { Language, LANGUAGES } from '../types';
 import { withRetry } from '../utils';
-import { getGeminiKey } from '../lib/gemini';
 
 interface Expression {
   phrase: string;
@@ -19,7 +18,7 @@ interface CultureData {
 
 interface CultureHubProps {
   language: Language;
-  onAction?: () => Promise<boolean> | boolean;
+  onAction?: () => void;
 }
 
 export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) => {
@@ -29,7 +28,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
   const [isSearching, setIsSearching] = useState(false);
   const [playingAudioIdx, setPlayingAudioIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const decodeAudioData = async (data: Uint8Array, ctx: AudioContext, sampleRate: number, numChannels: number): Promise<AudioBuffer> => {
@@ -47,9 +46,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
     if (playingAudioIdx !== null) return;
     setPlayingAudioIdx(index);
     try {
-      const apiKey = getGeminiKey();
-      if (!apiKey) return; // Silent fail or handle UI feedback
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
@@ -79,38 +76,25 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
   const fetchCultureData = async (query?: string) => {
     setIsLoading(true);
     setError(null);
-    setError(null);
-
-    // Only track usage if it's a specific query search, not the initial load
-    if (query && onAction) {
-      const allowed = await onAction();
-      if (!allowed) {
-        setIsLoading(false);
-        return;
-      }
-    }
-
+    if (onAction) onAction();
+    
     try {
-      const apiKey = getGeminiKey();
-      if (!apiKey) {
-        throw new Error("API Key não configurada. Conecte na nuvem.");
-      }
-      const ai = new GoogleGenAI({ apiKey });
-      const promptText = query
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const promptText = query 
         ? `Aja como um guia cultural. Explore o tema "${query}" relacionado a países que falam ${language}.`
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
 
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: [{
-          parts: [{
+        contents: [{ 
+          parts: [{ 
             text: `${promptText} 
             REGRAS OBRIGATÓRIAS:
             1. Retorne apenas o objeto JSON.
             2. Responda as explicações em PORTUGUÊS.
             3. As expressões devem estar no idioma original (${language}).
-            4. Seja conciso e use fatos interessantes.`
-          }]
+            4. Seja conciso e use fatos interessantes.` 
+          }] 
         }],
         config: {
           responseMimeType: "application/json",
@@ -154,7 +138,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
       const text = response.text || '';
       const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(jsonStr);
-
+      
       if (parsed && parsed.history && parsed.etiquette) {
         setCultureData(parsed);
       } else {
@@ -184,7 +168,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Cultura & Exploração</h2>
           <p className="text-slate-400 text-sm md:text-base">Descubra curiosidades ou explore locais específicos em países de língua {language}.</p>
         </div>
-        <button
+        <button 
           onClick={handleSearchClick}
           className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1e293b]/40 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-slate-500 text-sm font-medium opacity-60"
         >
@@ -200,14 +184,14 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
             <div className="text-slate-600 mr-3 shrink-0">
               <i className="fas fa-lock"></i>
             </div>
-            <input
+            <input 
               type="text"
               disabled
               placeholder={`Busca Real-Time (ELITE)...`}
               className="flex-1 bg-transparent py-4 text-slate-600 placeholder-slate-700 outline-none text-sm cursor-not-allowed"
             />
           </div>
-          <button
+          <button 
             onClick={handleSearchClick}
             className="px-6 py-4 bg-slate-800 border border-white/5 text-slate-500 font-bold rounded-2xl transition-all text-xs flex items-center justify-center gap-2"
           >
@@ -238,7 +222,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
             <div className="text-center">
               <h3 className="text-[9px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] md:tracking-[0.5em] mb-8 md:mb-12 italic">Deep Dive Cultural (Versão Essencial)</h3>
             </div>
-
+            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-stretch">
               {/* History Card */}
               <div className="glass-panel rounded-[2.5rem] border-white/5 bg-black/20 overflow-hidden flex flex-col group transition-all">
@@ -276,7 +260,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
                       <div key={idx} className="relative">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-emerald-400 font-bold text-sm md:text-base">"{exp.phrase}"</span>
-                          <button
+                          <button 
                             onClick={() => playExpression(exp.phrase, idx)}
                             className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${playingAudioIdx === idx ? 'bg-emerald-500 text-white' : 'bg-white/5 text-slate-500 hover:text-white'}`}
                           >

@@ -7,7 +7,7 @@ import { getGeminiKey } from '../lib/gemini';
 
 interface GrammarLabProps {
   language: Language;
-  onAction?: () => Promise<boolean> | boolean;
+  onAction?: () => void;
 }
 
 export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) => {
@@ -23,19 +23,11 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
     setIsLoading(true);
     setAnalysis(null);
     setTranslation(null);
-    setTranslation(null);
-    if (onAction) {
-      const allowed = await onAction();
-      if (!allowed) {
-        setIsLoading(false);
-        return;
-      }
-    }
+    if (onAction) onAction();
     try {
       const apiKey = getGeminiKey();
       if (!apiKey) {
-        setAnalysis("Configure a Gemini API Key no botão 'Conectar Nuvem'");
-        setIsLoading(false);
+        setAnalysis("API Key não configurada. Use o título (5 cliques) para configurar.");
         return;
       }
       const ai = new GoogleGenAI({ apiKey });
@@ -136,13 +128,13 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
 
                 <div className="pt-8 border-t border-white/5">
                   <div className="flex flex-col gap-3">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tradução</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Tradução</span>
                     <div className="flex items-center gap-3">
                       <div className="flex-1">
                         <select
                           value={targetTransLang}
                           onChange={(e) => setTargetTransLang(e.target.value as Language)}
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-slate-300 font-medium outline-none cursor-pointer hover:border-white/20 transition-all appearance-none"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-slate-300 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer hover:border-white/20 transition-all appearance-none"
                         >
                           {LANGUAGES.map(lang => (
                             <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
@@ -152,7 +144,7 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
                       <button
                         onClick={translateAnalysis}
                         disabled={isTranslating}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20 font-bold text-[10px] uppercase tracking-widest active:scale-95 disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold rounded-xl transition-all whitespace-nowrap active:scale-95 disabled:opacity-50"
                       >
                         {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-language"></i>}
                         {translation ? 'Traduzir de Novo' : 'Traduzir Agora'}

@@ -1,20 +1,15 @@
 
-// Helper to retrieve Gemini API Key from localStorage or environment
+import { GoogleGenAI } from '@google/genai';
+
 export const getGeminiKey = (): string | null => {
-    // 1. Priority: Vercel/Environment Variables (Global for all students)
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
-        return import.meta.env.VITE_API_KEY;
-    }
-    if (typeof process !== 'undefined' && process.env && (process.env.API_KEY || (process.env as any).VITE_API_KEY)) {
-        return process.env.API_KEY || (process.env as any).VITE_API_KEY;
-    }
+    // 1. Prioridade para variáveis de ambiente (Vercel/Vite)
+    const envKey = (process.env as any).VITE_API_KEY || (process.env as any).API_KEY;
+    if (envKey && envKey !== 'undefined') return envKey;
 
-    // 2. Fallback: localStorage (Local override for owner testing)
+    // 2. Fallback para localStorage (Manual/Secret Setup)
     if (typeof window !== 'undefined') {
-        const localKey = localStorage.getItem('gemini_api_key');
-        if (localKey) return localKey;
+        return localStorage.getItem('gemini_api_key');
     }
-
     return null;
 };
 

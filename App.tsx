@@ -24,7 +24,6 @@ const App: React.FC = () => {
   const [plan, setPlan] = useState<PlanLevel>('Essencial');
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [setupClickCount, setSetupClickCount] = useState(0);
-  const [recoveryMode, setRecoveryMode] = useState(false);
 
   // States for Inline Setup
   const [showSetup, setShowSetup] = useState(false);
@@ -76,11 +75,8 @@ const App: React.FC = () => {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (event === 'PASSWORD_RECOVERY') {
-        setRecoveryMode(true);
-      }
     });
 
     return () => subscription.unsubscribe();
@@ -151,8 +147,8 @@ const App: React.FC = () => {
     }
   };
 
-  if (supabase && (!session || recoveryMode)) {
-    return <Auth forceRecovery={recoveryMode} onComplete={() => setRecoveryMode(false)} />;
+  if (supabase && !session) {
+    return <Auth />;
   }
 
   if (isLoadingData) {
@@ -176,21 +172,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
             <button onClick={() => setShowSetup(false)} className="absolute top-3 right-3 text-slate-500 hover:text-white"><i className="fas fa-times"></i></button>
-            <h3 className="text-lg font-bold text-white mb-2 text-center">Configuração de IA</h3>
-
-            <div className="mb-4 p-3 bg-white/5 border border-white/10 rounded-xl text-[10px] space-y-1">
-              <p className="font-bold text-slate-500 uppercase tracking-widest">Status da Conexão Global (Vercel):</p>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400 italic">Variável VITE_API_KEY:</span>
-                {import.meta.env.VITE_API_KEY ? <span className="text-emerald-400 font-black">CONECTADO</span> : <span className="text-amber-500 font-black">PENDENTE</span>}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400 italic">Variável VITE_SUPABASE_URL:</span>
-                {import.meta.env.VITE_SUPABASE_URL ? <span className="text-emerald-400 font-black">CONECTADO</span> : <span className="text-amber-500 font-black">PENDENTE</span>}
-              </div>
-            </div>
-
-            <h3 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest text-center">Ajuste Manual (Local)</h3>
+            <h3 className="text-lg font-bold text-white mb-4 text-center">Conectar Supabase</h3>
 
 
             <div className="space-y-3">
@@ -255,7 +237,16 @@ const App: React.FC = () => {
 
           <div className="flex items-center gap-2 md:gap-4">
 
-            {/* O botão "Configurar IA" foi removido da visão do aluno. Acesso via 5 cliques no logo. */}
+            {/* O botão "Configurar IA" agora só aparece se NÃO houver chave configurada ou se clicado 5 vezes no logo */}
+            {(!localStorage.getItem('gemini_api_key') || !localStorage.getItem('supabase_url')) && (
+              <button
+                onClick={() => setShowSetup(true)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition-all animate-pulse"
+              >
+                <i className="fas fa-plug"></i>
+                Configurar IA
+              </button>
+            )}
 
             <div className="relative">
               <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl hover:bg-white/10 transition-all">

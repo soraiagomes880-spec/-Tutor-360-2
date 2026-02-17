@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality, GenerateContentResponse } from '@google/genai';
-import { Language } from '../types';
+import { Language, LANGUAGES } from '../types';
 import { withRetry } from '../utils';
 import { getGeminiKey } from '../lib/gemini';
 
@@ -25,13 +25,17 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
   const [targetPhrase, setTargetPhrase] = useState(DEFAULT_PHRASES[language]);
   const [isRecording, setIsRecording] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [translation, setTranslation] = useState<string | null>(null);
   const [isPlayingTarget, setIsPlayingTarget] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [targetTransLang, setTargetTransLang] = useState<Language>('Português Brasil');
 
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     setTargetPhrase(DEFAULT_PHRASES[language]);
     setFeedback(null);
+    setTranslation(null);
   }, [language]);
 
   const decode = (base64: string) => {
@@ -91,6 +95,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
       return;
     }
     setFeedback("Analisando sua pronúncia...");
+    setTranslation(null);
     if (onAction) {
       const allowed = await onAction();
       if (!allowed) {
@@ -117,6 +122,29 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
       setFeedback(e.message?.includes('503')
         ? "O servidor de IA está sobrecarregado. Tente novamente em instantes."
         : "Erro ao analisar. Tente novamente.");
+    } finally {
+      setIsRecording(false);
+    }
+  };
+
+  const translateFeedback = async () => {
+    if (!feedback || isTranslating) return;
+    setIsTranslating(true);
+    try {
+      const apiKey = getGeminiKey();
+      if (!apiKey) return;
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: {
+          parts: [{ text: `Translate the following pronunciation feedback into ${targetTransLang}: "${feedback}". Respond ONLY with the translation.` }]
+        }
+      }));
+      setTranslation(response.text ?? null);
+    } catch (e) {
+      alert("Erro na tradução.");
+    } finally {
+      setIsTranslating(false);
     }
   };
 
@@ -178,6 +206,46 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
                 </div>
                 <div className="prose prose-invert text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-white/5 p-6 rounded-2xl border border-white/5 italic">
                   {feedback}
+                </div>
+
+                {translation && (
+                  <div className="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10 animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-2 mb-3 text-emerald-400">
+                      <i className="fas fa-language"></i>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Tradução em {targetTransLang}</span>
+                    </div>
+                    <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-wrap italic">
+                      {translation}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-8 pt-8 border-t border-white/5">
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tradução</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <select
+                          value={targetTransLang}
+                          onChange={(e) => setTargetTransLang(e.target.value as Language)}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-slate-300 font-medium outline-none cursor-pointer hover:border-white/20 transition-all appearance-none"
+                        >
+                          {LANGUAGES.map(lang => (
+                            <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        onClick={translateFeedback}
+                        disabled={isTranslating}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20 font-bold text-[10px] uppercase tracking-widest active:scale-95 disabled:opacity-50"
+                      >
+                        {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-language"></i>}
+                        {translation ? 'Traduzir de Novo' : 'Traduzir Agora'}
+                        <span className="ml-2 px-1.5 py-0.5 bg-indigo-400 text-[#0f172a] rounded text-[8px]">PRONTO</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (

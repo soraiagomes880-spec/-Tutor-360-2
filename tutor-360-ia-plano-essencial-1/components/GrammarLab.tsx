@@ -134,27 +134,31 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
                   </div>
                 )}
 
-                <div className="pt-8 border-t border-white/5 space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-3 items-center">
-                    <div className="flex-1 w-full">
-                      <select
-                        value={targetTransLang}
-                        onChange={(e) => setTargetTransLang(e.target.value as Language)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-slate-300 outline-none focus:ring-1 focus:ring-indigo-500"
+                <div className="pt-8 border-t border-white/5">
+                  <div className="flex flex-col gap-3">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tradução</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <select
+                          value={targetTransLang}
+                          onChange={(e) => setTargetTransLang(e.target.value as Language)}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-slate-300 font-medium outline-none cursor-pointer hover:border-white/20 transition-all appearance-none"
+                        >
+                          {LANGUAGES.map(lang => (
+                            <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        onClick={translateAnalysis}
+                        disabled={isTranslating}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20 font-bold text-[10px] uppercase tracking-widest active:scale-95 disabled:opacity-50"
                       >
-                        {LANGUAGES.map(lang => (
-                          <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
-                        ))}
-                      </select>
+                        {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-language"></i>}
+                        {translation ? 'Traduzir de Novo' : 'Traduzir Agora'}
+                        <span className="ml-2 px-1.5 py-0.5 bg-indigo-400 text-[#0f172a] rounded text-[8px]">PRONTO</span>
+                      </button>
                     </div>
-                    <button
-                      onClick={translateAnalysis}
-                      disabled={isTranslating}
-                      className="w-full sm:w-auto px-6 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"
-                    >
-                      {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-language"></i>}
-                      Traduzir Explicação
-                    </button>
                   </div>
                 </div>
               </div>

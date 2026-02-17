@@ -21,7 +21,9 @@ const SCAN_MESSAGES = [
 export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction }) => {
   const [image, setImage] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [translatedResult, setTranslatedResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [scanMessageIndex, setScanMessageIndex] = useState(0);
 
@@ -43,6 +45,7 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction }) =>
   const scanImage = async (base64Img: string) => {
     setIsScanning(true);
     setResult(null);
+    setTranslatedResult(null);
     if (onAction) {
       const allowed = await onAction();
       if (!allowed) {
@@ -74,6 +77,34 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction }) =>
     } finally {
       setIsScanning(false);
     }
+  };
+
+  const handleTranslate = async () => {
+    if (!result || isTranslating) return;
+    setIsTranslating(true);
+    try {
+      const apiKey = getGeminiKey();
+      if (!apiKey) return;
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: {
+          parts: [{ text: `Translate the following text into Portuguese: "${result}"` }]
+        }
+      }));
+      setTranslatedResult(response.text ?? null);
+    } catch (e) {
+      alert("Erro na tradução.");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const handleClear = () => {
+    setImage(null);
+    setResult(null);
+    setTranslatedResult(null);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +184,16 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction }) =>
           ) : (
             <button onClick={stopCamera} className="px-6 py-2.5 bg-red-500 text-white font-bold rounded-xl text-[10px] md:text-xs uppercase tracking-wider">Cancelar</button>
           )}
+
+          {(image || result) && (
+            <button
+              onClick={handleClear}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-slate-800 text-slate-300 font-bold rounded-xl shadow-lg hover:bg-slate-700 transition-all text-[10px] md:text-xs uppercase tracking-wider border border-white/5"
+            >
+              <i className="fas fa-trash-can"></i>
+              Limpar
+            </button>
+          )}
         </div>
       </div>
 
@@ -194,8 +235,37 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction }) =>
                 <p className="text-indigo-400 font-bold uppercase tracking-widest text-[10px]">{SCAN_MESSAGES[scanMessageIndex]}</p>
               </div>
             ) : result ? (
-              <div className="w-full text-left animate-in slide-in-from-bottom-4">
-                <p className="text-white text-base md:text-lg leading-relaxed font-medium whitespace-pre-wrap">{result}</p>
+              <div className="w-full text-left animate-in slide-in-from-bottom-4 space-y-6">
+                <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+                  <p className="text-white text-base md:text-lg leading-relaxed font-medium whitespace-pre-wrap">{result}</p>
+                </div>
+
+                {!translatedResult && (
+                  <button
+                    onClick={handleTranslate}
+                    disabled={isTranslating}
+                    className="flex items-center gap-3 px-6 py-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20 font-bold text-xs uppercase tracking-widest"
+                  >
+                    {isTranslating ? (
+                      <i className="fas fa-spinner fa-spin"></i>
+                    ) : (
+                      <i className="fas fa-language"></i>
+                    )}
+                    Traduzir Explicação
+                  </button>
+                )}
+
+                {translatedResult && (
+                  <div className="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10 animate-in fade-in duration-500">
+                    <div className="flex items-center gap-2 mb-3 text-emerald-400">
+                      <i className="fas fa-language"></i>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Tradução em Português</span>
+                    </div>
+                    <p className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre-wrap italic">
+                      {translatedResult}
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-6 max-w-xs opacity-40 p-4">

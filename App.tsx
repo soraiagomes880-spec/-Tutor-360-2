@@ -239,16 +239,7 @@ const App: React.FC = () => {
 
           <div className="flex items-center gap-2 md:gap-4">
 
-            {/* O botão "Configurar IA" agora só aparece se NÃO houver chave configurada ou se clicado 5 vezes no logo */}
-            {(!localStorage.getItem('gemini_api_key') || !localStorage.getItem('supabase_url')) && (
-              <button
-                onClick={() => setShowSetup(true)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition-all animate-pulse"
-              >
-                <i className="fas fa-plug"></i>
-                Configurar IA
-              </button>
-            )}
+            {/* O botão "Configurar IA" foi removido da visão do aluno. Acesso via 5 cliques no logo. */}
 
             <div className="relative">
               <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 rounded-xl hover:bg-white/10 transition-all">

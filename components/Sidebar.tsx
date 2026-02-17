@@ -36,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, usage
 
       <div className="p-8 flex-1 overflow-y-auto">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">MENU DE ESTUDO</p>
+
         <nav className="space-y-1.5 mb-10">
           {menuItems.map((item) => (
             <button
@@ -61,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, usage
             <span className="text-xs text-slate-400">{usage}/{limit}</span>
           </div>
           <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden mb-1">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-indigo-500 to-blue-400 rounded-full transition-all duration-500"
               style={{ width: `${usagePercentage}%` }}
             ></div>

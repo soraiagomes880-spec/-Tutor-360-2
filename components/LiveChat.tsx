@@ -145,6 +145,8 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
         callbacks: {
           onopen: () => {
             console.log("PRO Debug: Conexão aberta.");
+            if (audioContextInRef.current) audioContextInRef.current.resume();
+            if (audioContextOutRef.current) audioContextOutRef.current.resume();
             setIsActive(true);
             setIsConnecting(false);
             setTranscription([{ role: 'tutor', text: GREETINGS[language] }]);
@@ -187,6 +189,11 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
               ] as any);
               setCurrentInput('');
               setCurrentOutput('');
+            }
+            if (message.serverContent?.interrupted) {
+              sourcesRef.current.forEach(s => { try { s.stop(); } catch (e) { } });
+              sourcesRef.current.clear();
+              nextStartTimeRef.current = 0;
             }
           },
           onclose: () => {
@@ -353,8 +360,8 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
             </div>
 
             <form onSubmit={handleTextResponse} className="relative w-full">
-              <input type="text" value={userTextResponse} onChange={(e) => setUserTextResponse(e.target.value)} placeholder="Diga algo ou digite aqui..." disabled={!isActive && !isConnecting} className="w-full bg-[#1e293b]/40 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder-slate-600 outline-none focus:border-indigo-500/50 transition-all text-sm pr-28" />
-              <button type="submit" disabled={(!isActive && !isConnecting) || !userTextResponse.trim()} className="absolute right-3 top-1/2 -translate-y-1/2 px-5 py-2 bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600/30 hover:text-white disabled:opacity-20 text-xs font-bold rounded-xl transition-all">Enviar</button>
+              <input type="text" value={userTextResponse} onChange={(e) => setUserTextResponse(e.target.value)} placeholder="Diga algo ou digite aqui..." disabled={isConnecting} className="w-full bg-[#1e293b]/40 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder-slate-600 outline-none focus:border-indigo-500/50 transition-all text-sm pr-28" />
+              <button type="submit" disabled={isConnecting || !userTextResponse.trim()} className="absolute right-3 top-1/2 -translate-y-1/2 px-5 py-2 bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600/30 hover:text-white disabled:opacity-20 text-xs font-bold rounded-xl transition-all" >Enviar</button>
             </form>
           </div>
         </div>

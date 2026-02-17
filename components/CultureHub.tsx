@@ -95,10 +95,10 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
 
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: [{
           parts: [{
-            text: `${promptText} 
+            text: `${promptText}
             REGRAS OBRIGATÓRIAS:
             1. Retorne apenas o objeto JSON.
             2. Responda as explicações em PORTUGUÊS.

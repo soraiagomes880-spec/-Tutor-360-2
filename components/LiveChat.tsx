@@ -141,7 +141,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
 
       console.log("PRO Debug: Conectando ao modelo Live...");
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         callbacks: {
           onopen: () => {
             console.log("PRO Debug: Conexão aberta.");

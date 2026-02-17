@@ -21,7 +21,7 @@ const StudentBenefitsSection = () => {
                                 "Percebe sua própria evolução"
                             ].map((benefit, index) => (
                                 <div key={index} className="flex gap-4 items-start">
-                                    <div className="mt-1 bg-green-500/10 p-1 rounded-full text-green-500">
+                                    <div className="mt-1 bg-secondary/10 p-1 rounded-full text-secondary">
                                         <CheckCircle2 className="w-5 h-5" />
                                     </div>
                                     <p className="text-lg font-medium">{benefit}</p>

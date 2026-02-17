@@ -29,30 +29,30 @@ const StudentHeroSection = () => {
                         <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 backdrop-blur-sm">
                             <span className="text-secondary text-xs">★</span>
                             <span className="text-sm text-secondary font-medium tracking-wide uppercase">
-                                PRIMEIRA DOBRA — HERO
+                                SEU TUTOR DE IDIOMAS 24 HORAS POR DIA
                             </span>
                         </div>
 
                         {/* Headline */}
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.1] mb-6 text-foreground tracking-tight">
-                            Falar bem exige prática.{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400 block mt-2">
-                                E não só em sala de aula.
+                            Você não trava porque não sabe.{" "}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-yellow-500 block mt-2">
+                                Você trava porque pratica pouco.
                             </span>
                         </h1>
 
                         {/* Subheadline */}
                         <p className="text-lg md:text-xl text-muted-foreground/90 mb-8 leading-relaxed max-w-xl">
-                            Pratique o idioma fora da aula e ganhe confiança para se comunicar com{" "}
-                            <span className="text-foreground font-semibold">mais segurança.</span>
+                            A fluência não vem da teoria. Vem da prática.{" "}
+                            <span className="text-foreground font-semibold">Pratique todos os dias com uma IA que se adapta ao seu nível.</span>
                         </p>
 
                         {/* Microcopy */}
                         <div className="flex items-center gap-3 mb-8 text-sm text-muted-foreground/80 font-medium bg-background/50 backdrop-blur-md p-3 rounded-xl border border-white/5 inline-flex">
-                            <div className="w-1 h-12 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+                            <div className="w-1 h-12 bg-gradient-to-b from-secondary to-yellow-600 rounded-full"></div>
                             <p>
-                                O Tutor 360 IA complementa suas aulas,<br />
-                                ajudando você a praticar no dia a dia.
+                                Criado para complementar sua escola<br />
+                                e acelerar sua evolução no idioma.
                             </p>
                         </div>
 

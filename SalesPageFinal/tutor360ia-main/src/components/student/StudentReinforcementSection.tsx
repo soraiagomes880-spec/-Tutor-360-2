@@ -1,3 +1,5 @@
+import { Handshake } from "lucide-react";
+
 const StudentReinforcementSection = () => {
     return (
         <section className="py-20 bg-card border-y border-border/50">
@@ -6,6 +8,9 @@ const StudentReinforcementSection = () => {
                     <span className="text-secondary font-bold uppercase tracking-wider text-sm mb-6 block">
                         REFORÇO PEDAGÓGICO
                     </span>
+                    <div className="flex justify-center mb-6 text-secondary">
+                        <Handshake className="w-12 h-12" />
+                    </div>
                     <p className="text-2xl md:text-3xl font-medium text-muted-foreground/80 leading-relaxed mb-8">
                         "O Tutor 360 IA <strong className="text-foreground">não substitui sua escola</strong> e nem o seu professor.
                         Ele <strong className="text-primary">reforça</strong> o que você aprende em sala, criando mais oportunidades de prática no seu dia a dia."
@@ -17,7 +22,7 @@ const StudentReinforcementSection = () => {
                         <div className="p-4 rounded-xl bg-background border border-border/50">
                             A prática consolida.
                         </div>
-                        <div className="p-4 rounded-xl bg-background border border-border/50 text-secondary">
+                        <div className="p-4 rounded-xl bg-background border border-border/50 text-secondary shadow-[0_0_20px_-5px_rgba(234,179,8,0.3)]">
                             A constância transforma.
                         </div>
                     </div>

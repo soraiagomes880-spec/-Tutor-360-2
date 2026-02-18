@@ -18,7 +18,7 @@ const StudentPlansSection = () => {
             ],
             highlight: false,
             cta: "Assinar Essencial",
-            link: "https://pay.kiwify.com.br/ESSENCIAL" // Placeholder link
+            link: "https://pay.kiwify.com.br/F2nM2jT"
         },
         {
             name: "Pro",
@@ -34,7 +34,7 @@ const StudentPlansSection = () => {
             ],
             highlight: true, // "Mais popular"
             cta: "Assinar Pro",
-            link: "https://pay.kiwify.com.br/PRO" // Placeholder link
+            link: "https://pay.kiwify.com.br/tscGrbH"
         },
         {
             name: "Elite",
@@ -50,7 +50,7 @@ const StudentPlansSection = () => {
             ],
             highlight: false, // "Mais completo"
             cta: "Assinar Elite",
-            link: "https://pay.kiwify.com.br/ELITE" // Placeholder link
+            link: "https://pay.kiwify.com.br/5Bgh03k"
         }
     ];
 

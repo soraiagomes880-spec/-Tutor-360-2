@@ -3,10 +3,10 @@ import { useState } from "react";
 import LegalModals from "./LegalModals";
 
 const Footer = () => {
-  const [modalType, setModalType] = useState<"terms" | "privacy" | "partnership" | null>(null);
+  const [modalType, setModalType] = useState<"terms" | "privacy" | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = (type: "terms" | "privacy" | "partnership") => {
+  const openModal = (type: "terms" | "privacy") => {
     setModalType(type);
     setIsModalOpen(true);
   };
@@ -45,12 +45,6 @@ const Footer = () => {
                 className="text-sm text-foreground/80 hover:text-primary transition-colors text-left"
               >
                 Política de Privacidade
-              </button>
-              <button
-                onClick={() => openModal("partnership")}
-                className="text-sm text-foreground/80 hover:text-primary transition-colors text-left"
-              >
-                Contrato de Parceria
               </button>
             </nav>
           </div>

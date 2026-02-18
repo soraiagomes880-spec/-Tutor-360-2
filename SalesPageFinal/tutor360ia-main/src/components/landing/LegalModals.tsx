@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface LegalModalsProps {
     isOpen: boolean;
     onClose: () => void;
-    type: "terms" | "privacy" | "partnership" | null;
+    type: "terms" | "privacy" | null;
 }
 
 const LegalModals = ({ isOpen, onClose, type }: LegalModalsProps) => {
@@ -36,18 +36,6 @@ const LegalModals = ({ isOpen, onClose, type }: LegalModalsProps) => {
                     <p><strong>3. Armazenamento:</strong> Utilizamos servidores seguros (Supabase) para armazenar seu histórico de sessões e garantir que você possa retomar seus estudos de qualquer dispositivo.</p>
                     <p><strong>4. Direitos do Usuário (LGPD):</strong> Você tem o direito de solicitar o acesso, correção ou exclusão de seus dados pessoais a qualquer momento através do nosso suporte.</p>
                     <p><strong>5. Cookies:</strong> Utilizamos apenas cookies estritamente necessários para manter sua sessão ativa e garantir a segurança da plataforma.</p>
-                </div>
-            ),
-        },
-        partnership: {
-            title: "Contrato de Parceria (Escolas)",
-            text: (
-                <div className="space-y-4 text-sm leading-relaxed">
-                    <p><strong>1. Objeto:</strong> Esta parceria visa oferecer o Tutor 360 IA como um complemento tecnológico oficial para escolas de idiomas.</p>
-                    <p><strong>2. Modelo de Remuneração:</strong> A escola parceira recebe uma comissão de 40% sobre o valor da mensalidade de cada aluno que assinar através do seu link exclusivo.</p>
-                    <p><strong>3. Suporte Pedagógico:</strong> O app é posicionado como um reforço extraclasse. A escola mantém total autoridade sobre o currículo e o ensino presencial/online.</p>
-                    <p><strong>4. Transparência:</strong> O parceiro terá acesso a um painel de acompanhamento (conforme disponibilidade do plano) para verificar o desempenho e as conversões de sua base de alunos.</p>
-                    <p><strong>5. Rescisão:</strong> A parceria pode ser encerrada por qualquer uma das partes com aviso prévio de 30 dias, respeitando-se os pagamentos recorrentes dos alunos já ativos.</p>
                 </div>
             ),
         },

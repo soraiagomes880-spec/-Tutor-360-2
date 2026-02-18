@@ -112,9 +112,12 @@
 
   /* Floating animation for 3D phones */
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-15px);
     }
@@ -133,4 +136,14 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hide Lovable Branding */
+#lovable-badge,
+.lovable-badge,
+[class*="lovable-badge"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }

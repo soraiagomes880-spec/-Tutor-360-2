@@ -54,6 +54,13 @@ const StudentPlansSection = () => {
         }
     ];
 
+    const handlePlanClick = (e: React.MouseEvent, url: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Redirect directly to the Kiwify checkout
+        window.location.href = url;
+    };
+
     return (
         <section id="planos" className="py-24 bg-background">
             <div className="container mx-auto px-6">
@@ -110,20 +117,18 @@ const StudentPlansSection = () => {
                                 </ul>
                             </CardContent>
                             <CardFooter className="pt-8">
-                                <Button
-                                    className={`w-full h-12 text-base font-semibold ${plan.name === "Elite"
-                                        ? "bg-secondary hover:bg-secondary/90 text-background"
-                                        : plan.highlight
-                                            ? "bg-primary hover:bg-primary/90 text-white"
-                                            : "bg-white/10 hover:bg-white/20 text-white"
+                                <button
+                                    onClick={(e) => handlePlanClick(e, plan.link)}
+                                    className={`w-full h-12 inline-flex items-center justify-center rounded-xl text-base font-bold transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg cursor-pointer ${plan.name === "Elite"
+                                            ? "bg-secondary text-background hover:bg-secondary/90 shadow-secondary/20"
+                                            : plan.highlight
+                                                ? "bg-primary text-white hover:bg-primary/90 shadow-primary/20"
+                                                : "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20"
                                         }`}
-                                    asChild
                                 >
-                                    <a href={plan.link} target="_blank" rel="noopener noreferrer">
-                                        {plan.cta}
-                                        <Check className="ml-2 w-4 h-4" />
-                                    </a>
-                                </Button>
+                                    {plan.cta}
+                                    <Check className="ml-2 w-4 h-4" />
+                                </button>
                             </CardFooter>
                         </Card>
                     ))}

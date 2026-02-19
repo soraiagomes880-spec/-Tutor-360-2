@@ -172,7 +172,6 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
     setPlayingIdiomIdx(index);
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
-
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: phrase }] }],
@@ -220,9 +219,33 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
     }
   };
 
+  // Translation states
+  const [targetTranslationLang, setTargetTranslationLang] = useState<Language>('Português Brasil');
+  const [translation, setTranslation] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const translateContent = async () => {
+    if (!content || isTranslating) return;
+    setIsTranslating(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Traduza o seguinte conteúdo sobre cultura e exploração para ${targetTranslationLang}. Mantenha a formatação e o tom informativo: "${content}"`,
+      });
+      setTranslation(response.text ?? "Erro na tradução.");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   useEffect(() => {
     fetchTrends();
     fetchInsights();
+    setContent(null);
+    setTranslation(null);
   }, [language]);
 
   return (
@@ -232,14 +255,38 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
           <h2 className="text-3xl font-bold text-white mb-2">Cultura & Exploração</h2>
           <p className="text-slate-400">Descubra tendências ou explore locais específicos em países de língua {language}.</p>
         </div>
-        <button
-          onClick={fetchTrends}
-          className="self-start md:self-center p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-slate-400 flex items-center gap-2 text-sm"
-          title="Ver tendências gerais"
-        >
-          <i className="fas fa-arrow-trend-up"></i>
-          Tendências
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-1 items-end">
+            <label className="text-[8px] text-slate-500 font-black uppercase tracking-widest">TRADUÇÃO</label>
+            <div className="flex items-center gap-2">
+              <select
+                value={targetTranslationLang}
+                onChange={(e) => setTargetTranslationLang(e.target.value as Language)}
+                className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-indigo-400 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+              >
+                {LANGUAGES.map(lang => (
+                  <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
+                ))}
+              </select>
+              <button
+                onClick={translateContent}
+                disabled={isTranslating || !content}
+                className="px-3 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 disabled:opacity-30"
+              >
+                {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : 'PRONTO'}
+              </button>
+            </div>
+          </div>
+          <div className="h-10 w-px bg-white/10 mx-2 hidden md:block"></div>
+          <button
+            onClick={fetchTrends}
+            className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-slate-400 flex items-center gap-2 text-sm h-10"
+            title="Ver tendências gerais"
+          >
+            <i className="fas fa-arrow-trend-up"></i>
+            Tendências
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel p-6 rounded-[2rem] border-white/10 bg-indigo-500/5">
@@ -288,8 +335,19 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
               </div>
             )}
 
-            <div className="prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">
-              {content}
+            <div className="space-y-6">
+              <div className="prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed text-lg whitespace-pre-wrap">
+                {content}
+              </div>
+
+              {translation && (
+                <div className="bg-indigo-500/5 p-6 rounded-[2rem] border border-indigo-500/10 animate-in fade-in slide-in-from-top-2">
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tradução</p>
+                  <div className="prose prose-invert max-w-none text-slate-400 text-base italic leading-relaxed whitespace-pre-wrap">
+                    {translation}
+                  </div>
+                </div>
+              )}
             </div>
 
             {links.length > 0 && (
@@ -306,8 +364,8 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${link.uri.includes('google.com/maps')
-                          ? 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
-                          : 'bg-indigo-600/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-600/20'
+                        ? 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
+                        : 'bg-indigo-600/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-600/20'
                         }`}
                     >
                       <i className={`fas ${link.uri.includes('google.com/maps') ? 'fa-location-arrow' : 'fa-link'}`}></i>

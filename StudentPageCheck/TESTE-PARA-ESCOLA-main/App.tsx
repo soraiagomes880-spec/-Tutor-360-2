@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { LiveChat } from './components/LiveChat';
@@ -23,22 +23,57 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('Inglês');
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [apiKeyDetected, setApiKeyDetected] = useState(false);
-  
+
   const [stats, setStats] = useState<UserStats>(() => {
     try {
       const saved = localStorage.getItem('tutor360_stats');
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch (e) { }
     return { lessons: 0, hours: 0, days: 0, usage: 0, lastActiveDate: null };
   });
 
+  // Secret Config States
+  const [setupClickCount, setSetupClickCount] = useState(0);
+  const [showSetup, setShowSetup] = useState(false);
+  const [customApiKey, setCustomApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
+  const configClicksRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    const key = process.env.API_KEY;
+    const key = customApiKey || process.env.API_KEY;
     const isDetected = !!key && key.length > 10;
     setApiKeyDetected(isDetected);
-    
+
     localStorage.setItem('tutor360_stats', JSON.stringify(stats));
-  }, [stats]);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && (e.key === 'S' || e.key === 's')) {
+        setShowSetup(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [stats, customApiKey]);
+
+  const handleConfigTrigger = () => {
+    if (configClicksRef.current) clearTimeout(configClicksRef.current);
+
+    setSetupClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setShowSetup(true);
+        return 0;
+      }
+      configClicksRef.current = setTimeout(() => setSetupClickCount(0), 3000);
+      return next;
+    });
+  };
+
+  const saveApiKey = (key: string) => {
+    localStorage.setItem('gemini_api_key', key);
+    setCustomApiKey(key);
+    setShowSetup(false);
+    window.location.reload();
+  };
 
   const recordActivity = (durationMinutes: number = 5) => {
     setStats(prev => ({
@@ -58,25 +93,61 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-[#020617] text-slate-200 overflow-hidden">
-      {/* Sidebar Desktop - Não modificada conforme solicitado */}
+      {/* MODAL DE CONFIGURAÇÃO SECRETA */}
+      {showSetup && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowSetup(false)}></div>
+          <div className="relative w-full max-w-md glass-panel p-8 rounded-[2rem] border-white/10 shadow-2xl animate-in zoom-in duration-200">
+            <h2 className="text-2xl font-bold text-white mb-4 text-left">Configurações Avançadas</h2>
+            <p className="text-slate-400 text-sm mb-6 text-left lowercase">Ambiente de Controle para Estudantes</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Google Gemini API Key</label>
+                <input
+                  type="password"
+                  defaultValue={customApiKey}
+                  id="master_api_key"
+                  placeholder="AIzaSy..."
+                  className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white outline-none focus:ring-2 focus:ring-indigo-600 font-mono text-xs"
+                />
+              </div>
+              <button
+                onClick={() => saveApiKey((document.getElementById('master_api_key') as HTMLInputElement).value)}
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95"
+              >
+                SALVAR E ATIVAR IA
+              </button>
+              <button
+                onClick={() => setShowSetup(false)}
+                className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl transition-all text-xs border border-white/5"
+              >
+                CANCELAR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sidebar Desktop */}
       <div className="hidden md:flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} usage={stats.usage} />
       </div>
 
       <main className="flex-1 overflow-y-auto relative pb-24 md:pb-0 custom-scrollbar">
         <header className="sticky top-0 z-50 glass-panel border-b border-white/5 px-4 md:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer select-none" onClick={handleConfigTrigger}>
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <i className="fas fa-graduation-cap text-white text-xl"></i>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Tutor 360 <span className="text-indigo-400">IA</span></h1>
+              <h1 className="text-xl font-bold text-white tracking-tight leading-none">TUTOR 360 <span className="text-indigo-400">ALUNO TESTE</span></h1>
             </div>
           </div>
 
           <div className="relative">
-            <button 
-              onClick={() => setShowLangMenu(!showLangMenu)} 
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
               className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl hover:bg-white/10 transition-all shadow-lg active:scale-95"
             >
               <span className="text-xl">{currentLang.flag}</span>
@@ -94,11 +165,10 @@ const App: React.FC = () => {
                       <button
                         key={lang.name}
                         onClick={() => handleLanguageSelect(lang.name)}
-                        className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left group ${
-                          language === lang.name 
-                          ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/20' 
-                          : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                        }`}
+                        className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left group ${language === lang.name
+                            ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/20'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                          }`}
                       >
                         <span className="text-2xl group-hover:scale-110 transition-transform">{lang.flag}</span>
                         <div className="flex flex-col">
@@ -129,11 +199,11 @@ const App: React.FC = () => {
 
           <Suspense fallback={<div className="flex items-center justify-center h-full py-20"><i className="fas fa-circle-notch fa-spin text-3xl text-indigo-500"></i></div>}>
             {activeTab === 'dashboard' && <Dashboard language={language} onStart={() => setActiveTab('live')} onViewHelp={() => setActiveTab('help')} stats={stats} />}
-            {activeTab === 'live' && <LiveChat language={language} onSessionEnd={recordActivity} />}
-            {activeTab === 'pronunciation' && <PronunciationLab language={language} onActivity={recordActivity} />}
-            {activeTab === 'writing' && <GrammarLab language={language} onActivity={recordActivity} />}
-            {activeTab === 'scan' && <VisualScan language={language} onActivity={recordActivity} />}
-            {activeTab === 'culture' && <CultureHub language={language} />}
+            {activeTab === 'live' && <LiveChat language={language} onSessionEnd={recordActivity} apiKey={customApiKey} />}
+            {activeTab === 'pronunciation' && <PronunciationLab language={language} onActivity={recordActivity} apiKey={customApiKey} />}
+            {activeTab === 'writing' && <GrammarLab language={language} onActivity={recordActivity} apiKey={customApiKey} />}
+            {activeTab === 'scan' && <VisualScan language={language} onActivity={recordActivity} apiKey={customApiKey} />}
+            {activeTab === 'culture' && <CultureHub language={language} apiKey={customApiKey} />}
             {activeTab === 'help' && <Tutorial />}
           </Suspense>
         </div>
@@ -146,7 +216,7 @@ const App: React.FC = () => {
             <i className="fas fa-house text-lg"></i>
             <span className="text-[9px] font-bold uppercase tracking-tighter">Início</span>
           </button>
-          
+
           <button onClick={() => setActiveTab('live')} className={`flex flex-col items-center gap-1 min-w-[56px] transition-all flex-shrink-0 ${activeTab === 'live' ? 'text-indigo-400' : 'text-slate-500'}`}>
             <i className="fas fa-microphone-lines text-lg"></i>
             <span className="text-[9px] font-bold uppercase tracking-tighter">Voz</span>

@@ -2,6 +2,14 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 const StudentFinalCTASection = () => {
+    const scrollToPlans = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const element = document.getElementById('planos');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <section className="py-24 relative overflow-hidden">
             <div className="absolute inset-0 bg-blue-600/10"></div>
@@ -17,11 +25,14 @@ const StudentFinalCTASection = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-12">
-                    <Button variant="heroPrimary" size="xl" className="group uppercase tracking-wide px-12 h-16 text-lg shadow-2xl shadow-blue-500/20" asChild>
-                        <a href="#planos">
-                            Começar a praticar agora
-                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform ml-2" />
-                        </a>
+                    <Button
+                        variant="heroPrimary"
+                        size="xl"
+                        className="group uppercase tracking-wide px-12 h-16 text-lg shadow-2xl shadow-blue-500/20"
+                        onClick={scrollToPlans}
+                    >
+                        Começar a praticar agora
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform ml-2" />
                     </Button>
                 </div>
             </div>

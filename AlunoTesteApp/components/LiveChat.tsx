@@ -134,6 +134,36 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onSessionEnd, apiK
     }
   };
 
+  const translateMessage = async (index: number) => {
+    const textToTranslate = transcription[index].text;
+    if (!textToTranslate || isTranslatingIdx !== null) return;
+
+    setIsTranslatingIdx(index);
+    try {
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Traduza o seguinte texto para ${targetTranslationLang}. Mantenha o tom e o contexto educativo: "${textToTranslate}"`,
+      });
+      const translatedText = response.text || "Erro na tradução.";
+      setMessageTranslations(prev => ({ ...prev, [index]: translatedText }));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsTranslatingIdx(null);
+    }
+  };
+
+  const translateLastMessage = () => {
+    // Find the last tutor message index
+    for (let i = transcription.length - 1; i >= 0; i--) {
+      if (transcription[i].role === 'tutor') {
+        translateMessage(i);
+        break;
+      }
+    }
+  };
+
   const playTts = async (text: string, msgKey: string) => {
     if (playingTtsId !== null) return;
     setPlayingTtsId(msgKey);
@@ -456,16 +486,25 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onSessionEnd, apiK
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4 w-full sm:w-auto">
                     <div className="flex flex-col gap-1 w-full sm:w-32">
-                      <label className="text-[8px] text-slate-500 font-black uppercase tracking-widest">Tradução</label>
-                      <select
-                        value={targetTranslationLang}
-                        onChange={(e) => setTargetTranslationLang(e.target.value as Language)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-indigo-400 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                      >
-                        {LANGUAGES.map(lang => (
-                          <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
-                        ))}
-                      </select>
+                      <label className="text-[8px] text-slate-500 font-black uppercase tracking-widest">TRADUÇÃO</label>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={targetTranslationLang}
+                          onChange={(e) => setTargetTranslationLang(e.target.value as Language)}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] text-indigo-400 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                        >
+                          {LANGUAGES.map(lang => (
+                            <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={translateLastMessage}
+                          disabled={isTranslatingIdx !== null || transcription.filter(m => m.role === 'tutor').length === 0}
+                          className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 disabled:opacity-30"
+                        >
+                          {isTranslatingIdx !== null ? <i className="fas fa-spinner fa-spin"></i> : 'PRONTO'}
+                        </button>
+                      </div>
                     </div>
                     <div className="hidden sm:block h-8 w-px bg-white/10"></div>
                     <div className="hidden md:block">

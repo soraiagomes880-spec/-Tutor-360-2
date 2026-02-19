@@ -2,6 +2,14 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 const StudentHeroSection = () => {
+    const scrollToPlans = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const element = document.getElementById('planos');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <section className="relative min-h-[90vh] flex items-center pt-20 md:pt-0 overflow-hidden bg-background">
             {/* Background Image with Overlay */}
@@ -60,12 +68,10 @@ const StudentHeroSection = () => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                             <Button
                                 className="bg-secondary hover:bg-secondary/90 text-background font-bold text-lg px-8 h-14 rounded-xl shadow-[0_0_20px_-5px_rgba(234,179,8,0.4)] transition-all hover:scale-105"
-                                asChild
+                                onClick={scrollToPlans}
                             >
-                                <a href="#planos">
-                                    Começar a praticar agora
-                                    <ArrowRight className="w-5 h-5 ml-2" />
-                                </a>
+                                Começar a praticar agora
+                                <ArrowRight className="w-5 h-5 ml-2" />
                             </Button>
                         </div>
                     </div>

@@ -18,4 +18,5 @@ export const getGeminiKey = (): string | null => {
 
 export const saveGeminiKey = (key: string) => {
     localStorage.setItem('gemini_api_key', key);
+    localStorage.setItem('GEMINI_API_KEY', key);
 };

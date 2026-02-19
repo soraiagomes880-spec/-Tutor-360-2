@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { LiveChat } from './components/LiveChat';
@@ -79,7 +79,17 @@ const App: React.FC = () => {
       setSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'S') {
+        setShowSetup(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   useEffect(() => {
@@ -208,9 +218,21 @@ const App: React.FC = () => {
 
       <main className="flex-1 overflow-y-auto relative flex flex-col">
         <header className="sticky top-0 z-20 glass-panel border-b border-white/10 px-4 md:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer select-none"
+            onClick={() => {
+              setSetupClickCount(prev => {
+                const next = prev + 1;
+                if (next >= 5) {
+                  setShowSetup(true);
+                  return 0;
+                }
+                return next;
+              });
+            }}
+          >
             <button
-              onClick={() => setIsSidebarOpen(true)}
+              onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(true); }}
               className="lg:hidden w-10 h-10 flex items-center justify-center bg-white/5 rounded-lg border border-white/10"
             >
               <i className="fas fa-bars text-white"></i>
@@ -218,18 +240,7 @@ const App: React.FC = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <i className="fas fa-graduation-cap text-white text-xl"></i>
             </div>
-            <div
-              className="cursor-pointer select-none"
-              onClick={() => {
-                setSetupClickCount(prev => {
-                  if (prev + 1 >= 5) {
-                    setShowSetup(true);
-                    return 0;
-                  }
-                  return prev + 1;
-                });
-              }}
-            >
+            <div>
               <h1 className="text-lg md:text-xl font-bold tracking-tight text-white leading-none">Tutor 360</h1>
               <span className="text-[8px] md:text-[9px] bg-indigo-500/10 text-indigo-400/70 px-1.5 py-0.5 rounded border border-indigo-500/10 font-black uppercase mt-1 inline-block tracking-widest">{plan}</span>
             </div>

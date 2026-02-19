@@ -5,9 +5,10 @@ import { Language, LANGUAGES } from '../types';
 interface GrammarLabProps {
   language: Language;
   onActivity?: () => void;
+  apiKey?: string;
 }
 
-export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onActivity }) => {
+export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onActivity, apiKey }) => {
   const [text, setText] = useState('');
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,17 +18,17 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onActivity }) 
     setIsLoading(true);
     setAnalysis(null);
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: `Analyze this ${language} text for grammar. Suggest corrections in Portuguese: "${text}"`,
-        });
-        setAnalysis(response.text ?? "Análise concluída.");
-        if (onActivity) onActivity();
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Analyze this ${language} text for grammar. Suggest corrections in Portuguese: "${text}"`,
+      });
+      setAnalysis(response.text ?? "Análise concluída.");
+      if (onActivity) onActivity();
     } catch (e) {
-        setAnalysis("Erro na análise.");
+      setAnalysis("Erro na análise.");
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 

@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, Modality } from '@google/genai';
 import { Language, LANGUAGES } from '../types';
+import { withRetry } from '../utils';
 import { getGeminiKey } from '../lib/gemini';
 
 interface PronunciationLabProps {
   language: Language;
-  onActivity?: () => void;
+  onAction?: () => void;
   apiKey?: string;
 }
 
@@ -20,7 +21,7 @@ const DEFAULT_PHRASES: Record<Language, string> = {
   'Chinês': '妈妈骑马。马慢，妈妈骂马。(Māma qí mǎ. Mǎ màn, māma mà mǎ.)'
 };
 
-export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, onActivity, apiKey }) => {
+export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, onAction, apiKey }) => {
   const [targetPhrase, setTargetPhrase] = useState(DEFAULT_PHRASES[language]);
   const [isRecording, setIsRecording] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -36,7 +37,6 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
   useEffect(() => {
     setTargetPhrase(DEFAULT_PHRASES[language]);
     setFeedback(null);
-    setTranslation(null);
   }, [language]);
 
   const decode = (base64: string) => {
@@ -62,20 +62,20 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     setIsPlayingTarget(true);
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+      // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
+      const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: `Say this clearly in ${language}: ${targetPhrase}` }] }],
         config: {
+          // Fix: Correct typo in responseModalities (was responseModalalities)
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
         },
-      });
+      }));
 
       const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if (base64Audio) {
-        if (!audioContextRef.current) {
-          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-        }
+        if (!audioContextRef.current) audioContextRef.current = new AudioContext({ sampleRate: 24000 });
         const ctx = audioContextRef.current;
         const audioBuffer = await decodeAudioData(decode(base64Audio), ctx, 24000, 1);
         const source = ctx.createBufferSource();
@@ -83,40 +83,44 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
         source.connect(ctx.destination);
         source.onended = () => setIsPlayingTarget(false);
         source.start();
-      }
-    } catch (e) {
-      setIsPlayingTarget(false);
-    }
+      } else { setIsPlayingTarget(false); }
+    } catch (e) { setIsPlayingTarget(false); }
   };
 
   const handleAnalyze = async () => {
     setIsRecording(false);
-    if (!targetPhrase.trim()) return;
+    if (!targetPhrase.trim()) {
+      setFeedback("Por favor, escreva algo para treinar.");
+      return;
+    }
     setFeedback("Analisando sua pronúncia...");
     setTranslation(null);
+    if (onAction) onAction();
 
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: `Analyze the pronunciation of this phrase in ${language}: "${targetPhrase}". Provide 3 tips in ${language}. Keep the tips very short.`,
-      });
-      setFeedback(response.text ?? "Análise indisponível.");
-      if (onActivity) onActivity();
-    } catch (e) {
-      setFeedback("Erro ao analisar.");
+      // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
+      const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Analyze the pronunciation of this phrase in ${language} for a student: "${targetPhrase}". Assume the student just spoke this. Provide 3 specific tips on how to pronounce specific sounds or words in this text clearly. Respond in Portuguese.`,
+      }));
+      setFeedback(response.text ?? null);
+    } catch (e: any) {
+      setFeedback(e.message?.includes('503')
+        ? "O servidor de IA está sobrecarregado. Tente novamente em instantes."
+        : "Erro ao analisar. Tente novamente.");
     }
   };
 
   const translateFeedback = async () => {
-    if (!feedback || isTranslating || feedback === "Analisando sua pronúncia..." || feedback === "Erro ao analisar.") return;
+    if (!feedback || isTranslating || feedback === "Analisando sua pronúncia...") return;
     setIsTranslating(true);
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
-      const response = await ai.models.generateContent({
+      const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-2.0-flash',
-        contents: `Traduza esta análise de pronúncia para ${targetTranslationLang}: "${feedback}"`,
-      });
+        contents: `Traduza este feedback de pronúncia para ${targetTranslationLang}. Preserve o tom educativo e a formatação técnica: "${feedback}"`,
+      }));
       setTranslation(response.text ?? "Erro na tradução.");
     } catch (e) {
       console.error(e);
@@ -129,83 +133,106 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
       <div>
         <h2 className="text-3xl font-bold text-white mb-2">Laboratório de Pronúncia</h2>
-        <p className="text-slate-400">Personalize seu treino escrevendo o que deseja praticar em {language}.</p>
+        <p className="text-slate-400">Personalize seu treino escrevendo exatamente o que deseja praticar em {language}.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl space-y-8 flex flex-col">
           <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">O que você quer treinar?</label>
+              <button onClick={() => setTargetPhrase('')} className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest">Limpar Texto</button>
+            </div>
             <textarea
               value={targetPhrase}
               onChange={(e) => setTargetPhrase(e.target.value)}
+              placeholder={`Escreva uma palavra ou frase em ${language} aqui...`}
               className="w-full bg-black/30 p-6 rounded-2xl border border-white/10 text-xl font-medium text-white leading-relaxed focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all resize-none h-40"
             />
-            <button onClick={playTargetAudio} className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">
-              <i className="fas fa-volume-high mr-2"></i> Ouvir IA
-            </button>
+            <div className="flex justify-end">
+              <button onClick={playTargetAudio} disabled={isPlayingTarget || !targetPhrase.trim()} className="flex items-center gap-2 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 disabled:opacity-30 transition-colors uppercase tracking-widest">
+                <i className={`fas ${isPlayingTarget ? 'fa-spinner fa-spin' : 'fa-volume-high'}`}></i>
+                {isPlayingTarget ? 'Reproduzindo...' : 'Ouvir Pronúncia da IA'}
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col items-center gap-6 py-4 flex-1 justify-center">
             <button
               onMouseDown={() => setIsRecording(true)}
               onMouseUp={handleAnalyze}
-              className={`w-28 h-28 rounded-full flex items-center justify-center transition-all ${isRecording ? 'bg-red-500 scale-90' : 'bg-indigo-600 hover:scale-105'}`}
+              disabled={!targetPhrase.trim()}
+              className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 group relative disabled:opacity-20 ${isRecording ? 'bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-90' : 'bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/40 hover:scale-105'}`}
             >
               <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'} text-4xl text-white`}></i>
+              {isRecording && <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping"></div>}
             </button>
-            <p className="font-black text-sm text-slate-400 uppercase tracking-widest">
-              {isRecording ? 'Capturando...' : 'Segure para Gravar'}
+            <p className={`font-black text-sm transition-all uppercase tracking-widest ${isRecording ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
+              {isRecording ? 'Capturando sua voz...' : 'Segure para Gravar sua fala'}
             </p>
           </div>
         </div>
 
-        <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl flex flex-col min-h-[500px] bg-slate-900/30">
+        <div className="glass-panel p-8 rounded-[2.5rem] border-white/10 shadow-xl flex flex-col min-h-[500px]">
           <div className="flex justify-between items-center mb-6">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Feedback</label>
-            <div className="flex flex-col gap-1 items-end">
-              <label className="text-[8px] text-slate-500 font-black uppercase tracking-widest">TRADUÇÃO</label>
-              <div className="flex items-center gap-2">
-                <select
-                  value={targetTranslationLang}
-                  onChange={(e) => setTargetTranslationLang(e.target.value as Language)}
-                  className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-indigo-400 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                >
-                  {LANGUAGES.map(lang => (
-                    <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={translateFeedback}
-                  disabled={isTranslating || !feedback}
-                  className="px-3 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 disabled:opacity-30"
-                >
-                  {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : 'PRONTO'}
-                </button>
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Feedback Fonético</label>
+            {feedback && (
+              <div className="flex flex-col gap-1 items-end">
+                <label className="text-[8px] text-slate-500 font-black uppercase tracking-widest">TRADUÇÃO</label>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={targetTranslationLang}
+                    onChange={(e) => setTargetTranslationLang(e.target.value as Language)}
+                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-indigo-400 outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    {LANGUAGES.map(lang => (
+                      <option key={lang.name} value={lang.name} className="bg-slate-900">{lang.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={translateFeedback}
+                    disabled={isTranslating || !feedback}
+                    className="px-3 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 disabled:opacity-30"
+                  >
+                    {isTranslating ? <i className="fas fa-spinner fa-spin"></i> : 'PRONTO'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6">
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
             {feedback ? (
-              <div className="space-y-4">
-                <div className="prose prose-invert text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-white/5 p-6 rounded-2xl border border-white/5 shadow-inner">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+                <div className="flex items-center gap-4 text-green-400 mb-6 bg-green-400/10 p-5 rounded-2xl border border-green-400/20">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center"><i className="fas fa-spell-check"></i></div>
+                  <div>
+                    <p className="font-bold">Análise do Tutor IA</p>
+                    <p className="text-[10px] uppercase opacity-80 tracking-tighter">Foco na clareza e entonação</p>
+                  </div>
+                </div>
+                <div className="prose prose-invert text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-white/5 p-6 rounded-2xl border border-white/5 italic">
                   {feedback}
                 </div>
                 {translation && (
                   <div className="bg-indigo-500/5 p-5 rounded-2xl border border-indigo-500/10 animate-in fade-in slide-in-from-top-2">
                     <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2">Tradução</p>
-                    <p className="text-slate-400 text-sm italic leading-relaxed">{translation}</p>
+                    <div className="prose prose-invert max-w-none text-slate-400 text-sm italic leading-relaxed whitespace-pre-wrap">
+                      {translation}
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-12 opacity-20 text-center">
-                <i className="fas fa-wand-magic-sparkles text-5xl mb-6"></i>
-                <p className="text-slate-500 italic text-sm font-medium">Grave sua voz para ver a análise.</p>
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 italic p-12 text-center">
+                <i className="fas fa-keyboard text-3xl opacity-10 mb-6"></i>
+                <p className="max-w-[200px] text-sm leading-relaxed">Digite qualquer palavra or frase e receba dicas instantâneas.</p>
               </div>
             )}
           </div>
         </div>
       </div>
+      <style>{`.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }`}</style>
     </div>
   );
 };

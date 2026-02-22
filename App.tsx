@@ -88,9 +88,8 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('tutor_usage');
     return saved ? parseInt(saved) : 0;
   });
-  const [plan] = useState<PlanLevel>('Elite'); // Unlocking all features for test
-  const usageLimit = 15; // Set to 15 globally
-
+  const [plan] = useState<PlanLevel>('Pro');
+  const usageLimit = 80;
   // Exit Popup trigger
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {

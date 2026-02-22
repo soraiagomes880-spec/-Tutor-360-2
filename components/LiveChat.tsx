@@ -153,7 +153,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
             scriptProcessor.connect(audioCtxIn.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio && audioCtxOut.state !== 'closed') {
               const ctx = audioCtxOut;
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
@@ -273,8 +273,8 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/30 px-3 py-1.5 rounded-xl transition-all">
             <i className="fas fa-circle-check text-[10px] text-indigo-400"></i>
-            <i className="fas fa-user-tie text-xs text-indigo-400"></i>
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Voz Elite</span>
+            <i className="fas fa-crown text-xs text-indigo-400"></i>
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Voz Premium</span>
           </div>
 
           {(isActive || isConnecting) && (
@@ -362,7 +362,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
 
                 <div className="hidden lg:flex items-center gap-2 bg-indigo-500/5 px-3 py-1.5 rounded-xl border border-indigo-500/10 transition-all">
                   <i className="fas fa-sparkles text-[9px] text-indigo-400"></i>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-400">Vocabulário Elite Ativo</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-400">Vocabulário Avançado Ativo</span>
                 </div>
               </div>
 

@@ -140,8 +140,13 @@ const App: React.FC = () => {
       return;
     }
 
+    const timer = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 5000); // Garante que a tela saia do loading após 5s mesmo se o Supabase falhar
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      clearTimeout(timer);
       setIsAuthLoading(false);
     });
 

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { GoogleGenAI, Modality, GenerateContentResponse } from '@google/genai';
 import { Language, LANGUAGES } from '../types';
 import { withRetry } from '../utils';
 import { getGeminiKey } from '../lib/gemini';

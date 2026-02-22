@@ -93,22 +93,22 @@ const App: React.FC = () => {
   const [pluginPlan, setPluginPlan] = useState<PlanLevel>('Pro');
   // Supabase Auth and Profile Sync
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase?.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-    });
+    })?.data?.subscription;
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (session?.user) {
       const fetchProfile = async () => {
-        const { data, error } = await supabase
+        const { data, error } = await supabase!
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
@@ -116,7 +116,7 @@ const App: React.FC = () => {
 
         if (error && error.code === 'PGRST116') {
           // Profile doesn't exist, create it
-          await supabase.from('profiles').insert({
+          await supabase!.from('profiles').insert({
             id: session.user.id,
             usage_count: 0,
             plan_level: 'Pro'

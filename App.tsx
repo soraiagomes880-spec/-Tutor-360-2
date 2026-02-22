@@ -100,15 +100,12 @@ const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
             Resetar Tudo
           </button>
         </div>
-            Resetar Limite de Uso
-          </button>
-        </div>
 
         <div className="pt-6 border-t border-white/5 text-center">
           <p className="text-[9px] text-slate-600 leading-relaxed max-w-xs mx-auto italic uppercase tracking-wider font-medium">As chaves são salvas localmente e priorizam as variáveis de ambiente da Vercel.</p>
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

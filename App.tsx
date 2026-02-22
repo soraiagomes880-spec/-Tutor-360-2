@@ -93,16 +93,21 @@ const App: React.FC = () => {
   const [pluginPlan, setPluginPlan] = useState<PlanLevel>('Pro');
   // Supabase Auth and Profile Sync
   useEffect(() => {
-    supabase?.auth.getSession().then(({ data: { session } }) => {
+    if (!supabase) {
+      setIsAuthLoading(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsAuthLoading(false);
     });
 
-    const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-    })?.data?.subscription;
+    });
 
-    return () => subscription?.unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -176,8 +181,24 @@ const App: React.FC = () => {
 
   const currentLang = LANGUAGES.find(l => l.name === language) || LANGUAGES[0];
 
-  if (isAuthLoading) return <div className="h-screen bg-slate-950 flex items-center justify-center"><i className="fas fa-spinner fa-spin text-3xl text-indigo-500"></i></div>;
-  if (!session) return <Auth />;
+  if (isAuthLoading) return (
+    <div
+      className="h-screen bg-slate-950 flex flex-col items-center justify-center gap-6 cursor-pointer"
+      onClick={handleConfigTrigger}
+    >
+      <i className="fas fa-spinner fa-spin text-3xl text-indigo-500"></i>
+      <p className="text-slate-500 text-[10px] uppercase tracking-widest animate-pulse">Iniciando Ambiente...</p>
+
+      {showSetup && <SetupModal isOpen={showSetup} onClose={() => setShowSetup(false)} />}
+    </div>
+  );
+
+  if (!session) return (
+    <>
+      <Auth />
+      {showSetup && <SetupModal isOpen={showSetup} onClose={() => setShowSetup(false)} />}
+    </>
+  );
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden relative">

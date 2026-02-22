@@ -63,7 +63,10 @@ export const Auth: React.FC<{ onLogoClick?: () => void }> = ({ onLogoClick }) =>
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-500"></div>
 
                     <div className="text-center mb-10">
-                        <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-900/40 transform -rotate-6">
+                        <div
+                            onClick={onLogoClick}
+                            className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-900/40 transform -rotate-6 cursor-pointer active:scale-95 transition-transform"
+                        >
                             <i className="fas fa-graduation-cap text-white text-3xl"></i>
                         </div>
                         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Tutor 360 <span className="text-indigo-400">2</span></h1>

@@ -54,7 +54,7 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
       const base64Data = base64Img.split(',')[1];
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-1.5-flash',
         contents: {
           parts: [
             { text: `Analyze this image in ${language} educationally. Identify objects and describe the scene. Respond ONLY in ${language}.` },
@@ -79,7 +79,7 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-1.5-flash',
         contents: `Traduza esta descrição de imagem e informações culturais para ${targetTranslationLang}. Preserve o tom educativo: "${result}"`,
       }));
       setTranslation(response.text ?? "Erro na tradução.");

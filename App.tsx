@@ -15,6 +15,8 @@ import { Auth } from './components/Auth';
 
 const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [apiKey, setApiKey] = useState(getGeminiKey() || '');
+  const [supabaseUrl, setSupabaseUrl] = useState(localStorage.getItem('supabase_url') || '');
+  const [supabaseKey, setSupabaseKey] = useState(localStorage.getItem('supabase_key') || '');
 
   if (!isOpen) return null;
 
@@ -33,7 +35,8 @@ const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
           <p className="text-slate-400 text-xs mt-1 lowercase">Ambiente de Controle do Administrador</p>
         </div>
 
-        <div className="space-y-4 mb-8">
+        <div className="space-y-4 mb-8 max-h-[60vh] overflow-y-auto px-1 custom-scrollbar">
+          {/* Gemini API Key */}
           <div>
             <div className="flex justify-between items-center mb-2 px-1">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Google Gemini API Key</label>
@@ -47,17 +50,56 @@ const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
               className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-700 outline-none focus:border-indigo-500/50 transition-all font-mono text-xs"
             />
           </div>
+
+          {/* Supabase URL */}
+          <div>
+            <div className="flex justify-between items-center mb-2 px-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Supabase Project URL</label>
+              {localStorage.getItem('supabase_url') && <span className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-black uppercase">Ativo</span>}
+            </div>
+            <input
+              type="text"
+              value={supabaseUrl}
+              onChange={(e) => setSupabaseUrl(e.target.value)}
+              placeholder="https://xyz.supabase.co"
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-700 outline-none focus:border-indigo-500/50 transition-all font-mono text-xs"
+            />
+          </div>
+
+          {/* Supabase Anon Key */}
+          <div>
+            <div className="flex justify-between items-center mb-2 px-1">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Supabase Anon/Public Key</label>
+              {localStorage.getItem('supabase_key') && <span className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-black uppercase">Ativo</span>}
+            </div>
+            <input
+              type="password"
+              value={supabaseKey}
+              onChange={(e) => setSupabaseKey(e.target.value)}
+              placeholder="eyJhbG..."
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-700 outline-none focus:border-indigo-500/50 transition-all font-mono text-xs"
+            />
+          </div>
+
           <button
-            onClick={() => { saveGeminiKey(apiKey); window.location.reload(); }}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-900/40 active:scale-95 text-xs uppercase"
+            onClick={() => {
+              saveGeminiKey(apiKey);
+              localStorage.setItem('supabase_url', supabaseUrl);
+              localStorage.setItem('supabase_key', supabaseKey);
+              window.location.reload();
+            }}
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-indigo-900/40 active:scale-95 text-xs uppercase mt-4"
           >
-            Salvar e Ativar Chave
+            Salvar Todas as Configurações
           </button>
 
           <button
-            onClick={() => { localStorage.removeItem('tutor_usage'); window.location.reload(); }}
+            onClick={() => { localStorage.removeItem('tutor_usage'); localStorage.removeItem('supabase_url'); localStorage.removeItem('supabase_key'); window.location.reload(); }}
             className="w-full py-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 font-bold rounded-xl transition-all border border-red-500/20 active:scale-95 text-xs uppercase"
           >
+            Resetar Tudo
+          </button>
+        </div>
             Resetar Limite de Uso
           </button>
         </div>
@@ -65,8 +107,8 @@ const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
         <div className="pt-6 border-t border-white/5 text-center">
           <p className="text-[9px] text-slate-600 leading-relaxed max-w-xs mx-auto italic uppercase tracking-wider font-medium">As chaves são salvas localmente e priorizam as variáveis de ambiente da Vercel.</p>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

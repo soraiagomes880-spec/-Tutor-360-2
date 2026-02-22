@@ -239,7 +239,7 @@ const App: React.FC = () => {
 
   if (!session) return (
     <>
-      <Auth />
+      <Auth onLogoClick={handleConfigTrigger} />
       {showSetup && <SetupModal isOpen={showSetup} onClose={() => setShowSetup(false)} />}
     </>
   );

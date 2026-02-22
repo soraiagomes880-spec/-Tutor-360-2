@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-export const Auth: React.FC = () => {
+export const Auth: React.FC<{ onLogoClick?: () => void }> = ({ onLogoClick }) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

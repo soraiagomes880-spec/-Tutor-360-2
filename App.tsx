@@ -10,6 +10,8 @@ import { CultureHub } from './components/CultureHub';
 import { Tutorial } from './components/Tutorial';
 import { AppTab, Language, LANGUAGES } from './types';
 import { getGeminiKey, saveGeminiKey } from './lib/gemini';
+import { supabase } from './lib/supabase';
+import { Auth } from './components/Auth';
 
 const SetupModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [apiKey, setApiKey] = useState(getGeminiKey() || '');
@@ -82,14 +84,62 @@ const App: React.FC = () => {
   const [setupClickCount, setSetupClickCount] = useState(0);
   const [showSetup, setShowSetup] = useState(false);
   const [customApiKey, setCustomApiKey] = useState(() => getGeminiKey() || '');
+  const [session, setSession] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   // Usage State (15 uses for Essential)
-  const [usageCount, setUsageCount] = useState(() => {
-    const saved = localStorage.getItem('tutor_usage');
-    return saved ? parseInt(saved) : 0;
-  });
-  const [plan] = useState<PlanLevel>('Pro');
-  const usageLimit = 80;
+  const [usageCount, setUsageCount] = useState(0);
+  const [usageLimit, setUsageLimit] = useState(80);
+  const [pluginPlan, setPluginPlan] = useState<PlanLevel>('Pro');
+  // Supabase Auth and Profile Sync
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (session?.user) {
+      const fetchProfile = async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error && error.code === 'PGRST116') {
+          // Profile doesn't exist, create it
+          await supabase.from('profiles').insert({
+            id: session.user.id,
+            usage_count: 0,
+            plan_level: 'Pro'
+          });
+        } else if (data) {
+          setUsageCount(data.usage_count || 0);
+          setPluginPlan(data.plan_level as PlanLevel || 'Pro');
+        }
+      };
+      fetchProfile();
+    }
+  }, [session]);
+
+  const trackUsage = async () => {
+    if (!session?.user || usageCount >= usageLimit) return;
+    const nextCount = usageCount + 1;
+    setUsageCount(nextCount);
+
+    await supabase.from('profiles')
+      .update({ usage_count: nextCount })
+      .eq('id', session.user.id);
+  };
+
   // Exit Popup trigger
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {
@@ -124,14 +174,10 @@ const App: React.FC = () => {
     });
   };
 
-  const trackUsage = () => {
-    if (usageCount >= usageLimit) return;
-    const nextCount = usageCount + 1;
-    setUsageCount(nextCount);
-    localStorage.setItem('tutor_usage', nextCount.toString());
-  };
-
   const currentLang = LANGUAGES.find(l => l.name === language) || LANGUAGES[0];
+
+  if (isAuthLoading) return <div className="h-screen bg-slate-950 flex items-center justify-center"><i className="fas fa-spinner fa-spin text-3xl text-indigo-500"></i></div>;
+  if (!session) return <Auth />;
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden relative">
@@ -173,7 +219,7 @@ const App: React.FC = () => {
         setActiveTab={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }}
         usage={usageCount}
         limit={usageLimit}
-        planName={plan}
+        planName={pluginPlan}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
@@ -194,8 +240,8 @@ const App: React.FC = () => {
               <i className="fas fa-graduation-cap text-white text-xl"></i>
             </div>
             <div>
-              <h1 className="text-lg md:text-xl font-bold tracking-tight text-white leading-none">Tutor 360 <span className="text-indigo-400">IA</span></h1>
-              <span className="text-[8px] md:text-[9px] bg-indigo-500/10 text-indigo-400/70 px-1.5 py-0.5 rounded border border-indigo-500/10 font-black uppercase mt-1 inline-block tracking-widest">{plan}</span>
+              <h1 className="text-lg md:text-xl font-bold tracking-tight text-white leading-none">Tutor 360 <span className="text-indigo-400">2</span></h1>
+              <span className="text-[8px] md:text-[9px] bg-indigo-500/10 text-indigo-400/70 px-1.5 py-0.5 rounded border border-indigo-500/10 font-black uppercase mt-1 inline-block tracking-widest">{pluginPlan}</span>
             </div>
           </div>
 
@@ -221,7 +267,7 @@ const App: React.FC = () => {
 
         <div className="p-4 md:p-8 max-w-6xl mx-auto w-full">
           <Suspense fallback={<div className="flex items-center justify-center py-20"><i className="fas fa-circle-notch fa-spin text-3xl text-indigo-500"></i></div>}>
-            {activeTab === 'dashboard' && <Dashboard language={language} setActiveTab={setActiveTab} usage={usageCount} limit={usageLimit} planName={plan} />}
+            {activeTab === 'dashboard' && <Dashboard language={language} setActiveTab={setActiveTab} usage={usageCount} limit={usageLimit} planName={pluginPlan} />}
             {activeTab === 'live' && <LiveChat language={language} onAction={trackUsage} apiKey={customApiKey} />}
             {activeTab === 'pronunciation' && <PronunciationLab language={language} onAction={trackUsage} apiKey={customApiKey} />}
             {activeTab === 'writing' && <GrammarLab language={language} onAction={trackUsage} apiKey={customApiKey} />}

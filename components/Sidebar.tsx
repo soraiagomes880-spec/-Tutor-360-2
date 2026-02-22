@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { AppTab } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface SidebarProps {
   activeTab: AppTab;
@@ -61,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, usage
             <span className="text-xs text-slate-400">{usage}/{limit}</span>
           </div>
           <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden mb-1">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-indigo-500 to-blue-400 rounded-full transition-all duration-500"
               style={{ width: `${usagePercentage}%` }}
             ></div>
@@ -71,6 +72,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, usage
             <span className="text-[9px] text-indigo-400/80 font-bold uppercase tracking-tighter">{planName || 'Standard'}</span>
           </div>
         </div>
+
+        <button
+          onClick={() => supabase.auth.signOut()}
+          className="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest rounded-xl border border-red-500/20 transition-all active:scale-95"
+        >
+          <i className="fas fa-sign-out-alt"></i>
+          Sair da Conta
+        </button>
       </div>
     </aside>
   );

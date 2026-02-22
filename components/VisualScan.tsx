@@ -54,7 +54,7 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
       const base64Data = base64Img.split(',')[1];
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.0-flash',
         contents: {
           parts: [
             { text: `Analyze this image in ${language} educationally. Identify objects and describe the scene. Respond ONLY in ${language}.` },
@@ -64,7 +64,10 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
       }));
       setResult(response.text ?? null);
     } catch (e: any) {
-      setResult(e.message?.includes('503') ? "Servidor temporariamente indisponível." : "Falha na análise.");
+      console.error("Visual Scan Error:", e);
+      setResult(e.message?.includes('503') || e.message?.includes('overloaded')
+        ? "Servidor temporariamente indisponível. Tente novamente."
+        : `Falha na análise: ${e.message || 'Verifique sua chave API do Gemini.'}`);
     } finally {
       setIsScanning(false);
     }

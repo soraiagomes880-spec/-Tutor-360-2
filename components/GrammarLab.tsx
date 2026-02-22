@@ -27,14 +27,15 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction, apiK
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: `Analyze this ${language} text for grammar, vocabulary, and flow. Suggest corrections and explain why in Portuguese: "${text}"`,
+        model: 'gemini-2.0-flash',
+        contents: [{ role: 'user', parts: [{ text: `Analyze this ${language} text for grammar, vocabulary, and flow. Suggest corrections and explain porquê in Portuguese: "${text}"` }] }],
       }));
       setAnalysis(response.text ?? null);
     } catch (e: any) {
-      setAnalysis(e.message?.includes('503')
+      console.error("Grammar Analysis Error:", e);
+      setAnalysis(e.message?.includes('503') || e.message?.includes('overloaded')
         ? "O servidor de IA está ocupado. Por favor, tente novamente em instantes."
-        : "Erro na análise.");
+        : `Erro na análise: ${e.message || 'Verifique sua chave API do Gemini nas configurações.'}`);
     } finally {
       setIsLoading(false);
     }

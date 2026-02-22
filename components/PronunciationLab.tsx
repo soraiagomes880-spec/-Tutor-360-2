@@ -99,14 +99,15 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
-        contents: `Analyze the pronunciation of this phrase in ${language} for a student: "${targetPhrase}". Assume the student just spoke this. Provide 3 specific tips on how to pronounce specific sounds or words in this text clearly. Respond in Portuguese.`,
+        model: 'gemini-2.0-flash',
+        contents: [{ role: 'user', parts: [{ text: `Analyze the pronunciation of this phrase in ${language} for a student: "${targetPhrase}". Assume the student just spoke this. Provide 3 specific tips on how to pronounce specific sounds or words in this text clearly. Respond in Portuguese.` }] }],
       }));
       setFeedback(response.text ?? null);
     } catch (e: any) {
-      setFeedback(e.message?.includes('503')
+      console.error("Pronunciation Analysis Error:", e);
+      setFeedback(e.message?.includes('503') || e.message?.includes('overloaded')
         ? "O servidor de IA está sobrecarregado. Tente novamente em instantes."
-        : "Erro ao analisar. Tente novamente.");
+        : `Erro ao analisar: ${e.message || 'Verifique sua chave API do Gemini.'}`);
     }
   };
 

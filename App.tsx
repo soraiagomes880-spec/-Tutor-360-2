@@ -116,8 +116,6 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('Inglês');
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showExitPopup, setShowExitPopup] = useState(false);
-  const [hasShownExitPopup, setHasShownExitPopup] = useState(false);
 
   // Robustness & Config States
   const [setupClickCount, setSetupClickCount] = useState(0);
@@ -189,17 +187,6 @@ const App: React.FC = () => {
       .eq('id', session.user.id);
   };
 
-  // Exit Popup trigger
-  useEffect(() => {
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY < 5 && !hasShownExitPopup) {
-        setShowExitPopup(true);
-        setHasShownExitPopup(true);
-      }
-    };
-    document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, [hasShownExitPopup]);
 
   // Key Shortcut for Setup (Shift+S)
   useEffect(() => {
@@ -246,38 +233,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-200 overflow-hidden relative">
-
-      {/* POPUP DE INTENÇÃO DE SAÍDA */}
-      {showExitPopup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md" onClick={() => setShowExitPopup(false)}></div>
-          <div className="relative w-full max-w-lg glass-panel p-8 md:p-14 rounded-[2.5rem] border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center animate-in zoom-in duration-300">
-            <button onClick={() => setShowExitPopup(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
-              <i className="fas fa-times text-xl"></i>
-            </button>
-            <div className="w-24 h-24 bg-[#1e293b]/50 rounded-full flex items-center justify-center mx-auto mb-8 border border-white/5">
-              <i className="fas fa-graduation-cap text-indigo-500 text-4xl"></i>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Acelere sua Fluência Agora!</h2>
-            <p className="text-slate-200 text-base md:text-lg mb-10 leading-relaxed px-4 font-medium">
-              O Tutor 360 IA é o seu passaporte para falar com confiança. Não pare seus estudos agora! Escolha um plano de aceleração e turbine seu aprendizado 24h por dia.
-            </p>
-            <button
-              onClick={() => {
-                setShowExitPopup(false);
-                window.open('https://practice-360-buddy.lovable.app', '_blank');
-              }}
-              className="w-full py-5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-indigo-950/40 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 text-lg mb-8 uppercase tracking-wider"
-            >
-              Escolher meu Plano de Estudos
-              <i className="fas fa-arrow-right"></i>
-            </button>
-            <p className="text-[10px] font-bold text-slate-700 uppercase tracking-[0.4em]">
-              TUTOR 360 IA • PREMIUM LEARNING
-            </p>
-          </div>
-        </div>
-      )}
 
       <Sidebar
         activeTab={activeTab}

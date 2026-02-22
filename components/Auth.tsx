@@ -18,14 +18,14 @@ export const Auth: React.FC = () => {
 
         try {
             if (mode === 'signup') {
-                const { error } = await supabase.auth.signUp({ email, password });
+                const { error } = await supabase!.auth.signUp({ email, password });
                 if (error) throw error;
                 setMessage('Verifique seu e-mail para confirmar o cadastro!');
             } else if (mode === 'login') {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                const { error } = await supabase!.auth.signInWithPassword({ email, password });
                 if (error) throw error;
             } else if (mode === 'reset') {
-                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                const { error } = await supabase!.auth.resetPasswordForEmail(email, {
                     redirectTo: window.location.origin
                 });
                 if (error) throw error;

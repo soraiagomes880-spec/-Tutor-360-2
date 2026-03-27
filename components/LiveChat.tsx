@@ -134,7 +134,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
       updateLevel();
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         callbacks: {
           onopen: () => {
             setIsActive(true);
@@ -241,7 +241,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<any>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         contents: `Traduza esta frase de conversação para ${targetTransLang}. Mantenha o tom natural e informal: "${lastTutorMsg.text}"`,
       }));
 
@@ -382,4 +382,5 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
     </div>
   );
 };
+
 

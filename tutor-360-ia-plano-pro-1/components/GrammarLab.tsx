@@ -33,7 +33,7 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
       const ai = new GoogleGenAI({ apiKey });
       // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         contents: `Analyze this ${language} text for grammar, vocabulary, and flow. Suggest corrections and explain why in Portuguese: "${text}"`,
       }));
       setAnalysis(response.text ?? null);
@@ -55,7 +55,7 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
       const ai = new GoogleGenAI({ apiKey });
       // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         contents: `Translate the following educational analysis from Portuguese to ${targetTransLang}. Keep the same formatting and tone: "${analysis}"`,
       }));
       setTranslation(response.text ?? null);
@@ -172,3 +172,4 @@ export const GrammarLab: React.FC<GrammarLabProps> = ({ language, onAction }) =>
     </div>
   );
 };
+

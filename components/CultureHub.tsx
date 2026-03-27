@@ -52,9 +52,9 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (playingAudioIdx !== null) return;
     setPlayingAudioIdx(index);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' , apiVersion: "v1beta"});
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-1.5-flash",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
         config: {
           // Fix: Correct typo in responseModalities (was responseModalalities)
@@ -86,13 +86,13 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (onAction) onAction();
 
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' , apiVersion: "v1beta"});
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const promptText = query
         ? `Aja como um guia cultural. Explore o tema "${query}" relacionado a países que falam ${language}.`
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
 
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash-latest',
+        model: 'gemini-1.5-flash',
         contents: [{
           parts: [{
             text: `${promptText} 
@@ -164,9 +164,9 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (isTranslating || !textToTranslate) return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' , apiVersion: "v1beta"});
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-1.5-flash',
         contents: `Traduza este conteúdo cultural para ${targetTranslationLang}. Preserve o tom informativo e educativo: "${textToTranslate}"`,
       }));
       setTranslations(prev => ({ ...prev, [sectionKey]: response.text ?? "Erro na tradução." }));
@@ -354,6 +354,8 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     </div>
   );
 };
+
+
 
 
 

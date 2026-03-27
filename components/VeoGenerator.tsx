@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
 import { AspectRatio, GenerationStatus, VideoResult } from '../types';
 import { withRetry } from '../utils';
+import { getGeminiKey } from '../lib/gemini';
 
 interface VeoGeneratorProps {
   onComplete: (video: VideoResult) => void;
@@ -37,7 +38,7 @@ export const VeoGenerator: React.FC<VeoGeneratorProps> = ({ onComplete }) => {
 
     try {
       const base64Data = image.split(',')[1];
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: getGeminiKey() || '', apiVersion: 'v1' });
 
       // Fix: Cast operation to any to access .done and .response properties on the operation object
       let operation: any = await withRetry(() => ai.models.generateVideos({
@@ -55,7 +56,7 @@ export const VeoGenerator: React.FC<VeoGeneratorProps> = ({ onComplete }) => {
       const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
       if (!downloadLink) throw new Error("Falha ao retornar vídeo.");
 
-      const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+      const response = await fetch(`${downloadLink}&key=${getGeminiKey()}`);
       const blob = await response.blob();
       const videoUrl = URL.createObjectURL(blob);
       setResultVideo(videoUrl);

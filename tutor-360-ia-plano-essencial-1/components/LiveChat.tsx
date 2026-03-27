@@ -145,7 +145,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
       updateLevel();
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-1.5-flash-latest',
+        model: 'gemini-1.5-pro',
         callbacks: {
           onopen: () => {
             setIsActive(true);
@@ -357,4 +357,6 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
     </div>
   );
 };
+
+
 

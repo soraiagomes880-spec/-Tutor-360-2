@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { saveSupabaseConfig } from '../lib/supabase';
+import { saveGeminiKey } from '../lib/gemini';
 
 interface SupabaseSetupProps {
   onClose: () => void;
@@ -9,13 +10,15 @@ interface SupabaseSetupProps {
 export const SupabaseSetup: React.FC<SupabaseSetupProps> = ({ onClose }) => {
   const [url, setUrl] = useState(localStorage.getItem('supabase_url') || '');
   const [key, setKey] = useState(localStorage.getItem('supabase_key') || '');
+  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('gemini_api_key') || '');
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (url && key) {
+    if (url && key && geminiKey) {
       saveSupabaseConfig(url, key);
+      saveGeminiKey(geminiKey);
     } else {
-      alert("Por favor, preencha a URL e a Anon Key.");
+      alert("Por favor, preencha todos os campos.");
     }
   };
 
@@ -52,6 +55,16 @@ export const SupabaseSetup: React.FC<SupabaseSetupProps> = ({ onClose }) => {
               value={key}
               onChange={(e) => setKey(e.target.value)}
               placeholder="eyJhbG..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Google Gemini API Key</label>
+            <input 
+              type="password" 
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+              placeholder="AIzaSy..."
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-indigo-500"
             />
           </div>

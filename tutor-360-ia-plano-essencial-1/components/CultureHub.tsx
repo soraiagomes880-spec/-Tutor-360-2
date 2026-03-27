@@ -49,7 +49,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
     try {
       const apiKey = getGeminiKey();
       if (!apiKey) return; // Silent fail or handle UI feedback
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ apiKey , apiVersion: "v1beta"});
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: "gemini-1.5-flash",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
@@ -95,7 +95,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
       if (!apiKey) {
         throw new Error("API Key não configurada. Conecte na nuvem.");
       }
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ apiKey , apiVersion: "v1beta"});
       const promptText = query
         ? `Aja como um guia cultural. Explore o tema "${query}" relacionado a países que falam ${language}.`
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
@@ -303,3 +303,4 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
     </div>
   );
 };
+

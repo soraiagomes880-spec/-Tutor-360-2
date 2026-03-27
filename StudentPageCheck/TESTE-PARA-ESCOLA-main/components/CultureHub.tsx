@@ -56,7 +56,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
 
     try {
       const coords = await getCoordinates();
-      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' , apiVersion: "v1beta"});
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
@@ -89,7 +89,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
   const fetchInsights = async () => {
     setIsLoadingInsights(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' , apiVersion: "v1beta"});
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Gere insights culturais sobre ${langInfo?.region || language}. 
@@ -150,7 +150,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
     setIsLoading(true);
     setSearchQuery('');
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' , apiVersion: "v1beta"});
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Quais são as 3 principais tendências culturais ou de entretenimento em ${langInfo?.region || language} esta semana? Resuma para um estudante de ${language} em Português.`,
@@ -171,7 +171,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
     if (playingIdiomIdx !== null) return;
     setPlayingIdiomIdx(index);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || process.env.API_KEY || '' , apiVersion: "v1beta"});
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
@@ -394,3 +394,4 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, apiKey }) => {
     </div>
   );
 };
+

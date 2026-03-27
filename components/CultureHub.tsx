@@ -52,7 +52,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (playingAudioIdx !== null) return;
     setPlayingAudioIdx(index);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' , apiVersion: "v1beta"});
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
@@ -86,7 +86,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (onAction) onAction();
 
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' , apiVersion: "v1beta"});
       const promptText = query
         ? `Aja como um guia cultural. Explore o tema "${query}" relacionado a países que falam ${language}.`
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
@@ -164,7 +164,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (isTranslating || !textToTranslate) return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' , apiVersion: "v1beta"});
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: `Traduza este conteúdo cultural para ${targetTranslationLang}. Preserve o tom informativo e educativo: "${textToTranslate}"`,
@@ -354,3 +354,5 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     </div>
   );
 };
+
+

@@ -46,7 +46,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
     if (playingAudioIdx !== null) return;
     setPlayingAudioIdx(index);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY , apiVersion: "v1beta"});
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
@@ -79,7 +79,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
     if (onAction) onAction();
     
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY , apiVersion: "v1beta"});
       const promptText = query 
         ? `Aja como um guia cultural. Explore o tema "${query}" relacionado a países que falam ${language}.`
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
@@ -287,3 +287,4 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
     </div>
   );
 };
+

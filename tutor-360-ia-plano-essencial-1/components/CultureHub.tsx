@@ -51,7 +51,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
       if (!apiKey) return; // Silent fail or handle UI feedback
       const ai = new GoogleGenAI({ apiKey });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-tts",
+        model: "gemini-1.5-flash",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
         config: {
           // Fix: Correct typo in responseModalities (was responseModalalities)
@@ -101,7 +101,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction }) =>
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
 
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         contents: [{
           parts: [{
             text: `${promptText} 

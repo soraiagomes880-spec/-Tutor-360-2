@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { saveGeminiKey } from '../lib/gemini';
 
 interface SupabaseSetupProps {
   onClose: () => void;
@@ -7,11 +8,12 @@ interface SupabaseSetupProps {
 export const SupabaseSetup: React.FC<SupabaseSetupProps> = ({ onClose }) => {
   const [url, setUrl] = useState('');
   const [key, setKey] = useState('');
+  const [geminiKey, setGeminiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
-    if (!url || !key) {
+    if (!url || !key || !geminiKey) {
       setError("Preencha todos os campos.");
       return;
     }
@@ -29,6 +31,7 @@ export const SupabaseSetup: React.FC<SupabaseSetupProps> = ({ onClose }) => {
       // Using keys expected by lib/supabase.ts
       localStorage.setItem('supabase_url', url);
       localStorage.setItem('supabase_key', key);
+      saveGeminiKey(geminiKey);
 
       // Also set VITE_ vars for redundancy? No, lib/supabase checks specific keys.
 
@@ -78,6 +81,17 @@ export const SupabaseSetup: React.FC<SupabaseSetupProps> = ({ onClose }) => {
               value={key}
               onChange={(e) => setKey(e.target.value)}
               placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 transition-all font-mono text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Google Gemini API Key</label>
+            <input
+              type="password"
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+              placeholder="AIzaSy..."
               className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 outline-none focus:border-emerald-500/50 transition-all font-mono text-sm"
             />
           </div>

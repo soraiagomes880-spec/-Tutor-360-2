@@ -92,7 +92,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
 
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         contents: [{
           parts: [{
             text: `${promptText} 

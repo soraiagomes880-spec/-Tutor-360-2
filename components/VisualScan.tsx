@@ -51,7 +51,7 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
     setTranslation(null);
     if (onAction) onAction();
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const base64Data = base64Img.split(',')[1];
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
@@ -77,7 +77,7 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
     if (!result || isTranslating || result === "Iniciando varredura...") return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: `Traduza esta descrição de imagem e informações culturais para ${targetTranslationLang}. Preserve o tom educativo: "${result}"`,

@@ -52,7 +52,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (playingAudioIdx !== null) return;
     setPlayingAudioIdx(index);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: "gemini-1.5-flash",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
@@ -86,7 +86,8 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (onAction) onAction();
 
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
+    try {
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const promptText = query
         ? `Aja como um guia cultural. Explore o tema "${query}" relacionado a países que falam ${language}.`
         : `Gere um resumo cultural dinâmico sobre curiosidades e costumes atuais em países que falam ${language}.`;
@@ -97,54 +98,31 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
           parts: [{
             text: `${promptText} 
             REGRAS OBRIGATÓRIAS:
-            1. Retorne apenas o objeto JSON.
+            1. Retorne APENAS um objeto JSON puro, sem explicações fora do JSON.
             2. Responda as explicações em PORTUGUÊS.
             3. As expressões devem estar no idioma original (${language}).
-            4. Seja conciso e use fatos interessantes.`
+            4. Siga EXATAMENTE este formato:
+            {
+              "history": { "title": "...", "text": "..." },
+              "etiquette": { "title": "...", "text": "..." },
+              "expressions": [
+                { "phrase": "...", "meaning": "...", "example": "..." }
+              ]
+            }`
           }]
-        }],
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              history: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  text: { type: Type.STRING }
-                },
-                required: ["title", "text"]
-              },
-              etiquette: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  text: { type: Type.STRING }
-                },
-                required: ["title", "text"]
-              },
-              expressions: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    phrase: { type: Type.STRING },
-                    meaning: { type: Type.STRING },
-                    example: { type: Type.STRING }
-                  },
-                  required: ["phrase", "meaning", "example"]
-                }
-              }
-            },
-            required: ["history", "etiquette", "expressions"]
-          }
-        }
+        }]
       }));
 
       const text = response.text || '';
-      const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const parsed = JSON.parse(jsonStr);
+      // Enhanced manual JSON extraction
+      let jsonStr = text;
+      if (text.includes('```json')) {
+        jsonStr = text.split('```json')[1].split('```')[0].trim();
+      } else if (text.includes('```')) {
+        jsonStr = text.split('```')[1].split('```')[0].trim();
+      }
+      
+      const parsed = JSON.parse(jsonStr.trim());
 
       if (parsed && parsed.history && parsed.etiquette) {
         setCultureData(parsed);
@@ -164,7 +142,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     if (isTranslating || !textToTranslate) return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: `Traduza este conteúdo cultural para ${targetTranslationLang}. Preserve o tom informativo e educativo: "${textToTranslate}"`,
@@ -354,6 +332,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     </div>
   );
 };
+
 
 
 

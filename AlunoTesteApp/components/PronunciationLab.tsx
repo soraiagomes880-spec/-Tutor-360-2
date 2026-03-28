@@ -61,7 +61,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     if (isPlayingTarget || !targetPhrase.trim()) return;
     setIsPlayingTarget(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
@@ -98,7 +98,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     if (onAction) onAction();
 
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       // Fix: Use GenerateContentResponse generic type for withRetry to resolve "unknown" type error
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-3-flash-preview',
@@ -116,7 +116,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     if (!feedback || isTranslating || feedback === "Analisando sua pronúncia...") return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: `Traduza este feedback de pronúncia para ${targetTranslationLang}. Preserve o tom educativo e a formatação técnica: "${feedback}"`,
@@ -236,4 +236,5 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     </div>
   );
 };
+
 

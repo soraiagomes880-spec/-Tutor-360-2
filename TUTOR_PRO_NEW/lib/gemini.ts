@@ -19,3 +19,14 @@ export const saveGeminiKey = (key: string) => {
     localStorage.setItem('gemini_api_key', key);
     localStorage.setItem('GEMINI_API_KEY', key);
 };
+
+export const listAvailableModels = async (ai: any) => {
+    try {
+        const models = await ai.models.list();
+        console.log("Modelos permitidos para sua chave:", models);
+        return models;
+    } catch (e) {
+        console.error("Erro ao listar modelos:", e);
+        return [];
+    }
+};

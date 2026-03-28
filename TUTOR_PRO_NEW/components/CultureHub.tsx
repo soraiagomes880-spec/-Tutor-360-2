@@ -36,12 +36,16 @@ export const CultureHub: React.FC<{ language: Language; onAction?: () => void; a
 
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      
+      // Diagnostic Log: List available models to solve 404
+      import('../lib/gemini').then(m => m.listAvailableModels(ai));
+
       const promptText = searchQuery
         ? `Guia cultural: tema "${searchQuery}" em países de língua ${language}.`
         : `Resumo cultural: curiosidades e costumes em países de língua ${language}.`;
 
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         contents: [{
           parts: [{
             text: `${promptText} 
@@ -125,3 +129,4 @@ export const CultureHub: React.FC<{ language: Language; onAction?: () => void; a
     </div>
   );
 };
+

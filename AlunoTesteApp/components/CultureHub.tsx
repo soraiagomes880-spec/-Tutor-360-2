@@ -57,7 +57,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
         config: {
-          // Fix: Correct typo in responseModalities (was responseModalalities)
+          // Fix: Correct typo in responseModalities (was responseModalities)
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
         },
@@ -349,6 +349,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     </div>
   );
 };
+
 
 
 

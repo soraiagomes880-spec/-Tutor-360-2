@@ -57,7 +57,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
         model: "gemini-1.5-flash",
         contents: [{ parts: [{ text: `Say this naturally in ${language}: ${text}` }] }],
         config: {
-          // Fix: Correct typo in responseModalities (was responseModalalities)
+          // Fix: Correct typo in responseModalities (was responseModalities)
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
         },
@@ -85,7 +85,6 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     setTranslations({});
     if (onAction) onAction();
 
-    try {
     try {
       const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
       const promptText = query
@@ -332,6 +331,7 @@ export const CultureHub: React.FC<CultureHubProps> = ({ language, onAction, apiK
     </div>
   );
 };
+
 
 
 

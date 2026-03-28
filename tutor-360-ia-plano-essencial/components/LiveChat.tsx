@@ -102,7 +102,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: `Read this perfectly in ${language}: ${text}` }] }],
         config: {
-          responseModalalities: [Modality.AUDIO],
+          responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
         },
       });
@@ -206,7 +206,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
           onerror: () => stopSession(),
         },
         config: {
-          responseModalalities: [Modality.AUDIO],
+          responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
@@ -385,3 +385,4 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction }) => {
     </div>
   );
 };
+

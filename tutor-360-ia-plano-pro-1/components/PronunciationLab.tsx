@@ -71,7 +71,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
         model: 'gemini-1.5-pro',
         contents: [{ parts: [{ text: `Say this clearly in ${language}: ${targetPhrase}` }] }],
         config: {
-          // Fix: Correct typo in responseModalities (was responseModalalities)
+          // Fix: Correct typo in responseModalities (was responseModalities)
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
         },
@@ -257,6 +257,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     </div>
   );
 };
+
 
 
 

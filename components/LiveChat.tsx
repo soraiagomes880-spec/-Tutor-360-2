@@ -153,7 +153,10 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
             scriptProcessor.connect(audioCtxIn.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+            const serverContent = message.serverContent;
+            if (!serverContent) return;
+
+            const base64Audio = serverContent.modelTurn?.parts?.[0]?.inlineData?.data;
             if (base64Audio && audioCtxOut.state !== 'closed') {
               const ctx = audioCtxOut;
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
@@ -166,13 +169,13 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
               nextStartTimeRef.current += audioBuffer.duration;
               sourcesRef.current.add(source);
             }
-            if (message.serverContent?.inputTranscription) {
-              setCurrentInput(prev => prev + (message.serverContent?.inputTranscription?.text || ''));
+            if (serverContent.inputTranscription) {
+              setCurrentInput(prev => prev + (serverContent.inputTranscription?.text || ''));
             }
-            if (message.serverContent?.outputTranscription) {
-              setCurrentOutput(prev => prev + (message.serverContent?.outputTranscription?.text || ''));
+            if (serverContent.outputTranscription) {
+              setCurrentOutput(prev => prev + (serverContent.outputTranscription?.text || ''));
             }
-            if (message.serverContent?.turnComplete) {
+            if (serverContent.turnComplete) {
               setTranscription(prev => [
                 ...prev,
                 ...(currentInput ? [{ role: 'user', text: currentInput }] : []),

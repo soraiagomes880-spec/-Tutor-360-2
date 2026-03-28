@@ -38,7 +38,7 @@ export const VeoGenerator: React.FC<VeoGeneratorProps> = ({ onComplete }) => {
 
     try {
       const base64Data = image.split(',')[1];
-      const ai = new GoogleGenAI({ apiKey: getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: getGeminiKey() || '', apiVersion: 'v1beta' });
 
       // Fix: Cast operation to any to access .done and .response properties on the operation object
       let operation: any = await withRetry(() => ai.models.generateVideos({
@@ -109,3 +109,4 @@ export const VeoGenerator: React.FC<VeoGeneratorProps> = ({ onComplete }) => {
     </div>
   );
 };
+

@@ -62,7 +62,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     if (isPlayingTarget || !targetPhrase.trim()) return;
     setIsPlayingTarget(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: [{ parts: [{ text: `Say this clearly in ${language}: ${targetPhrase}` }] }],
@@ -97,7 +97,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     if (onAction) onAction();
 
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: [{ role: 'user', parts: [{ text: `Analyze the pronunciation of this phrase in ${language} for a student: "${targetPhrase}". Assume the student just spoke this. Provide 3 specific tips on how to pronounce specific sounds or words in this text clearly. Respond in Portuguese.` }] }],
@@ -115,7 +115,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     if (!feedback || isTranslating || feedback === "Analisando sua pronúncia...") return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: `Traduza este feedback de pronúncia para ${targetTranslationLang}. Preserve o tom educativo e a formatação técnica: "${feedback}"`,
@@ -235,6 +235,7 @@ export const PronunciationLab: React.FC<PronunciationLabProps> = ({ language, on
     </div>
   );
 };
+
 
 
 

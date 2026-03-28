@@ -239,7 +239,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
 
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: `Traduza esta frase de conversação para ${targetTransLang}. Mantenha o tom natural e informal: "${lastTutorMsg.text}"`,
@@ -382,6 +382,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
     </div>
   );
 };
+
 
 
 

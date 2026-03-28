@@ -3,12 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 
 // No Vite, process.env é injetado via config.define ou lido do localStorage
 const getEnv = (key: string) => {
-    try {
-        const val = (process.env as any)[`VITE_${key}`] || (process.env as any)[key];
-        return (val && val !== 'undefined') ? val : null;
-    } catch {
-        return null;
-    }
+    const env = (import.meta as any).env || {};
+    const processEnv = (typeof process !== 'undefined' ? process.env : {}) as any;
+    const val = env[`VITE_${key}`] || processEnv[`VITE_${key}`] || processEnv[key];
+    return (val && val !== 'undefined' && val !== '') ? val : null;
 };
 
 const supabaseUrl = getEnv('SUPABASE_URL') || (typeof window !== 'undefined' ? localStorage.getItem('supabase_url') : null);

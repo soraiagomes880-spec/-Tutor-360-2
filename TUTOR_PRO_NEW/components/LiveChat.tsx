@@ -110,7 +110,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const audioCtxIn = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
       const audioCtxOut = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       audioContextInRef.current = audioCtxIn;
@@ -134,7 +134,7 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
       updateLevel();
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-1.5-flash-latest',
+        model: 'gemini-2.0-flash-exp',
         callbacks: {
           onopen: () => {
             setIsActive(true);
@@ -242,10 +242,10 @@ export const LiveChat: React.FC<LiveChatProps> = ({ language, onAction, apiKey }
 
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash-latest',
-        contents: `Traduza esta frase de conversação para ${targetTransLang}. Mantenha o tom natural e informal: "${lastTutorMsg.text}"`,
+        model: 'gemini-2.0-flash-exp',
+        contents: [{ role: 'user', parts: [{ text: `Traduza esta frase de conversação para ${targetTransLang}. Mantenha o tom natural e informal: "${lastTutorMsg.text}"` }] }],
       }));
 
       const translationText = response.text ?? "Erro na tradução.";

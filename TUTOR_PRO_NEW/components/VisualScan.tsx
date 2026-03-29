@@ -51,16 +51,16 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
     setTranslation(null);
     if (onAction) onAction();
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const base64Data = base64Img.split(',')[1];
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash-latest',
-        contents: {
+        model: 'gemini-2.0-flash-exp',
+        contents: [{
           parts: [
             { text: `Analyze this image in ${language} educationally. Identify objects and describe the scene. Respond ONLY in ${language}.` },
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } }
           ]
-        }
+        }]
       }));
       setResult(response.text ?? null);
     } catch (e: any) {
@@ -77,10 +77,10 @@ export const VisualScan: React.FC<VisualScanProps> = ({ language, onAction, apiK
     if (!result || isTranslating || result === "Iniciando varredura...") return;
     setIsTranslating(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1' });
+      const ai = new GoogleGenAI({ apiKey: apiKey || getGeminiKey() || '', apiVersion: 'v1beta' });
       const response = await withRetry<GenerateContentResponse>(() => ai.models.generateContent({
-        model: 'gemini-1.5-flash-latest',
-        contents: `Traduza esta descrição de imagem e informações culturais para ${targetTranslationLang}. Preserve o tom educativo: "${result}"`,
+        model: 'gemini-2.0-flash-exp',
+        contents: [{ role: 'user', parts: [{ text: `Traduza esta descrição de imagem e informações culturais para ${targetTranslationLang}. Preserve o tom educativo: "${result}"` }] }],
       }));
       setTranslation(response.text ?? "Erro na tradução.");
     } catch (e) {
